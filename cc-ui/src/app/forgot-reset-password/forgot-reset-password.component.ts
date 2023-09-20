@@ -17,7 +17,9 @@ import { ConfirmationResponse, PassWriteRes } from '../sign-in/reset-password/Co
   
 export class ForgotResetPasswordComponent implements OnInit{
   userId : any; 
-  showPassword=false;
+  showPassword1: boolean = false;
+  showPassword2: boolean = false;
+  showPassword3: boolean = false;
   companyId : any;
   success = false
   isFailure = false
@@ -188,8 +190,15 @@ isFormValid = false;
   
   
   
-  
-  togglePasswordVisibility() {
-    this.showPassword = !this.showPassword;
+ // In your component
+togglePasswordVisibility(inputField: number) {
+  if (inputField === 1) {
+    this.showPassword1 = !this.showPassword1;
+  } else if (inputField === 2) {
+    this.showPassword2 = !this.showPassword2;
+  } else if (inputField === 3) {
+    this.showPassword3 = !this.showPassword3;
   }
+}
+
 }
