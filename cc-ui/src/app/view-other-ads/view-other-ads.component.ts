@@ -4,7 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../session.service';
 import { DatePipe } from '@angular/common';
 import { Location } from '@angular/common';
+import { forkJoin } from 'rxjs';
 
+// ...
 
 
 
@@ -138,7 +140,7 @@ selectedMainOption: string = ''; // To store the selected main option
   searchPortOfAd: any;
   displayedAds: Advertisement[] =[];
   matchedAds:  Advertisement[] =[];
-  type_of_ad: any;
+  type_of_ad!: string;
   container_type_list:Containers[]=[];
   isMatched:boolean = false;
   originalAds: Advertisement[] =[];
@@ -317,29 +319,52 @@ capitalizeFirstLetter(text: string): string {
 togglePopup() {
   this.showPopup = !this.showPopup;
 }
-  searchAds() {
-   
-    // Check if ad_type is defined
-    if (this.ad_type) {
-      // Call the getAdvertisement method with the selected ad_typeId
-      this.viewotherAds.getAdvertisement(this.ad_type,this.companyId).subscribe(
-        
-        (data: Advertisement[]) => {
-         
-          // Store the fetched advertisements in the component property
-          console.log(data);
-          this.ads = data;
-          this.originalAds = this.ads;
-          this.currentPage = 1;
-          
-          console.log("C or swap", this.ads);
-        },
-        error => {
-          console.error('Error fetching advertisements:', error);
-        }
-      );
+
+
+
+searchAds() {
+  debugger;
+  // Check if ad_type is defined
+  if (this.ad_type && this.selectedMainOption) {
+    const type_of_ads = []; // Array to store type_of_ad values
+
+    // Determine type_of_ad based on selectedMainOption
+    if (this.selectedMainOption === 'Trading') {
+      type_of_ads.push('buy', 'sell',); // Add all types to the array
+    } else if (this.selectedMainOption === 'Leasing') {
+      type_of_ads.push('lease','swap','oneway'); // Add 'Lease' to the array
     }
+
+    // Create an array to store the observables for each type_of_ad request
+    const observables = type_of_ads.map(type_of_ad =>
+      this.viewotherAds.getAdvertisementbytypeofad(this.ad_type, type_of_ad, this.companyId)
+    );
+
+    // Use forkJoin to make parallel requests for all type_of_ad values
+    forkJoin(observables).subscribe(
+      (responses: any[]) => {
+        // responses is an array containing the responses for each type_of_ad
+        const allAds = ([] as Advertisement[]).concat(...responses); // Combine all responses into a single array
+        console.log('All Ads:', allAds);
+
+        // Store the combined advertisements in the component property
+        this.ads = allAds;
+        this.originalAds = this.ads;
+        this.currentPage = 1;
+
+        console.log("Combined Ads:", this.ads);
+      },
+      error => {
+        console.error('Error fetching advertisements:', error);
+      }
+    );
   }
+}
+
+
+
+
+
   
   
     adTypeChanged(type: string) {
@@ -676,11 +701,20 @@ searchSpaceAdvertisements() {
   }
 
   displayAllAdvertisements() {
+    debugger
     this.showMapView = false;
     this.selectedView = 'MAP'; // Reset the selected view to 'MAP'
-    this.viewotherAds.getAdvertisement(this.ad_type,this.companyId).subscribe(
+    // this.viewotherAds.getAdvertisement(this.ad_type,this.companyId).subscribe(
+    //   (data: Advertisement[]) => {
+    //     this.ads = data;
+    //   },
+    //   error => console.log(error)
+    // );
+    debugger
+    this.viewotherAds.getAdvertisementbytypeofad(this.ad_type,this.type_of_ad,this.companyId).subscribe(
       (data: Advertisement[]) => {
         this.ads = data;
+        console.log("type_of_ad"+data)
       },
       error => console.log(error)
     );
