@@ -138,6 +138,11 @@ selectedMainOption: string = ''; // To store the selected main option
   showNoResultsMessage: boolean=true;
   ad_type!: string;
   searchPortOfAd: any;
+  selectedPortCode:any;
+  selectedArrivalPortCode:any;
+  selectedDeparturePortCode:any;
+  searchPortofDeparture:any;
+  searchPortofArrival:any;
   displayedAds: Advertisement[] =[];
   matchedAds:  Advertisement[] =[];
   type_of_ad!: string;
@@ -433,21 +438,36 @@ selectSubOption(subOption: string) {
   }
   updateSearchPortOfAd() {
     this.searchPortOfAd = this.port_of_ad;
+    this.selectedPortCode = this.port_of_ad.code;
+   
+    console.log("This is the selected Port",this.selectedPortCode);
+   
+  }
+  updateSearchPort(){
+    this.selectedDeparturePortCode = this.port_of_departure.depcode;
+   this.selectedArrivalPortCode = this.port_of_arrival.arrcode;
+   console.log("This is the selected depPort",this.selectedDeparturePortCode);
+   console.log("This is the selected arrPort",this.selectedArrivalPortCode);
   }
   searchContainerAdvertisements() {
     debugger;
     const searchType = this.type.toLowerCase();
-    const searchPortOfAd = this.port_of_ad;
+    const searchPortcode = this.selectedPortCode; // Use the selected port code
+
+    // Fetch the list of ports and find the port name based on the selected port code
+    const selectedPort = this.port_list.find((port: { port_code: any; }) => port.port_code === searchPortcode);
+    const searchPortOfAd = selectedPort ? selectedPort.port_name : ''; // Use the matched port name
+
     const selectedContainerType = this.selectedcontainerType;
     const selectedContainerSize = this.selectedcontainerSize;
-
+console.log("After port code",searchPortOfAd)
     if (this.selectedOptions['view'] !== 'MAP') {
         const matchedAds = [];
 
         for (const ad of this.originalAds) {
             let isMatched = false;
 
-            if (ad.ad_type === 'container' && ad.type_of_ad === searchType && ad.port_of_ad === searchPortOfAd && ad.container_type === selectedContainerType && ad.container_size === selectedContainerSize) {
+            if (ad.ad_type === 'container' && ad.type_of_ad === searchType && ad.port_of_ad === searchPortOfAd  && ad.container_type === selectedContainerType && ad.container_size === selectedContainerSize) {
                 isMatched = true;
             }
 
@@ -487,8 +507,8 @@ selectSubOption(subOption: string) {
 
     // Calculate the updated total number of pages based on the filtered ads
     this.totalPages;
-    
 }
+
 
 
   
@@ -519,11 +539,20 @@ selectSubOption(subOption: string) {
   
   
   
-searchSpaceAdvertisements() {
+  searchSpaceAdvertisements() {
     debugger;
     const searchType = this.type.toLowerCase();
-    const searchPortOfDep = this.port_of_departure;
-    const searchPortOfArr = this.port_of_arrival;
+    const searchPortOfDepCode = this.selectedDeparturePortCode; // Use the selected port code for departure
+    const searchPortOfArrCode = this.selectedArrivalPortCode; // Use the selected port code for arrival
+
+    // Fetch the list of ports and find the port names based on the selected port codes
+    const selectedPortOfDep = this.port_list.find((port: { port_code: any; }) => port.port_code === searchPortOfDepCode);
+    const selectedPortOfArr = this.port_list.find((port: { port_code: any; }) => port.port_code === searchPortOfArrCode);
+    
+    const searchPortOfDep = selectedPortOfDep ? selectedPortOfDep.port_name : '';
+    const searchPortOfArr = selectedPortOfArr ? selectedPortOfArr.port_name : '';
+    console.log("insidde space search",searchPortOfDep);
+    console.log("insidde space search",searchPortOfArr);
     const searchcontainertype = this.selectedcontainerType;
     const searchcontainersize = this.selectedcontainerSize;
 
@@ -538,7 +567,7 @@ searchSpaceAdvertisements() {
         this.selectedcontainertypetomap = searchcontainertype;
         this.selectedcontainersizetomap = searchcontainersize;
 
-        // Call markPortOfAdOnMap() in the mapViewComponent to update the location markers on the map
+        // Call markPortOfDepArrOnMap() in the mapViewComponent to update the location markers on the map
         if (this.mapViewComponent) {
             this.mapViewComponent.markPortOfDepArrOnMap();
         }
@@ -557,6 +586,7 @@ searchSpaceAdvertisements() {
                     const matchedAd = { ...ad };
                     matchedAds.push(matchedAd);
                 }
+                console.log(matchedAds);
             }
 
             if (matchedAds.length > 0) {
@@ -571,6 +601,7 @@ searchSpaceAdvertisements() {
             // No search criteria provided, reset ads to the original list
             this.ads = [...this.originalAds];
             this.currentPage = 1;
+
         }
     }
 
