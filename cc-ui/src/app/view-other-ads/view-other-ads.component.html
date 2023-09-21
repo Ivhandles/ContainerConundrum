@@ -74,7 +74,7 @@
             <path d="M15.0001 13.7931L11.2241 10.017C12.1314 8.9277 12.5839 7.5305 12.4873 6.11608C12.3908 4.70165 11.7526 3.37891 10.7057 2.423C9.65867 1.4671 8.28347 0.951637 6.86612 0.983845C5.44877 1.01605 4.0984 1.59345 3.09593 2.59593C2.09345 3.5984 1.51605 4.94877 1.48385 6.36612C1.45164 7.78347 1.9671 9.15867 2.923 10.2057C3.87891 11.2526 5.20165 11.8908 6.61608 11.9873C8.0305 12.0839 9.4277 11.6314 10.517 10.7241L14.2931 14.5001L15.0001 13.7931ZM2.50012 6.50012C2.50012 5.61010 2.76404 4.74007 3.25851 4.00005C3.75297 3.26003 4.45578 2.68325 5.27804 2.34266C6.10031 2.00207 7.00511 1.91295 7.87802 2.08658C8.75094 2.26022 9.55276 2.68880 10.1821 3.31814C10.8114 3.94747 11.24 4.7493 11.4137 5.62221C11.5873 6.49513 11.4982 7.39993 11.1576 8.22219C10.8170 9.04446 10.2402 9.74726 9.50018 10.2417C8.76016 10.7362 7.89013 11.0001 7.00012 11.0001C5.80705 10.9988 4.66323 10.5243 3.81960 9.68064C2.97597 8.83701 2.50144 7.69319 2.50012 6.50012Z" fill="#161616"/>
           </svg> -->
           <select class="container-select" [(ngModel)]="port_of_ad" (change)="updateSearchPortOfAd()">
-            <option *ngFor="let port of port_list" [value]="port.port_name">
+            <option *ngFor="let port of port_list" [ngValue]="{ name: port.port_name, code: port.port_code }">
               {{ capitalizeFirstLetter(port.port_name) }} ({{ port.port_code }})
             </option>
           </select>
@@ -87,8 +87,8 @@
       <ng-container *ngIf="ad_type === 'space'">
         <p class="port-text">Port of Departure</p>
        
-          <select class="container-select" [(ngModel)]="port_of_departure" (change)="updateSearchPortOfAd()">
-            <option *ngFor="let port of port_list" [value]="port.port_name">
+          <select class="container-select" [(ngModel)]="port_of_departure" (change)="updateSearchPort()">
+            <option *ngFor="let port of port_list" [ngValue]="{ name: port.port_name, depcode: port.port_code }">
               {{ capitalizeFirstLetter(port.port_name) }} ({{port.port_code}})
             </option>
           </select>
@@ -96,8 +96,8 @@
     
         <p class="port-text">Port of Arrival</p>
        
-          <select class="container-select" [(ngModel)]="port_of_arrival" (change)="updateSearchPortOfAd()">
-            <option *ngFor="let port of port_list" [value]="port.port_name">
+          <select class="container-select" [(ngModel)]="port_of_arrival" (change)="updateSearchPort()">
+            <option *ngFor="let port of port_list" [ngValue]="{ name: port.port_name, arrcode: port.port_code }">
               {{ capitalizeFirstLetter(port.port_name) }} ({{port.port_code}})
             </option>
           </select>
