@@ -313,7 +313,7 @@ pickup_charges:any;
 
 adTypeChanged(type: string) {
   this.ad_type = type;
-  console.log
+
   this.DisplayPostForm()
   
 }
