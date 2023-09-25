@@ -2,6 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ForecastingTableService } from '../../forecasting-table-view/forecasting-table-view.service';
 import { SessionService } from 'src/app/session.service';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { PostAdComponent } from 'src/app/my-advertisement/post-ad/post-ad.component';
+import { MatSnackBar, MatSnackBarConfig, MatSnackBarRef } from '@angular/material/snack-bar';
+import { PostAdService } from 'src/app/my-advertisement/post-ad/post-ad.service';
 
 @Component({
   selector: 'app-form',
@@ -9,17 +13,41 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
   styleUrls: ['./form.component.css']
 })
 export class FormComponent implements OnInit {
-  
-
-  
+  port_of_departure:any;
+port_of_arrival:any;
+  public isButtonDisabled: boolean = false;
+  ad_type!: string;
   inventory_list_by_companyId: Inventory[] = [];
   companyId: any;
+  isLoading:any;
+  type:any;
+  description!: any;
+  title!: any;
   surpluscontainerSize: number | null = null;
   port_list: any[] = [];
   portcode: any;
   surpluscontainerType:any;
   deifcitcontainerType:any;
   deficitcontainerSize:number | null = null;
+  operation:any;
+  from_date:any;
+  expiry_date:any;
+  userId: any;
+  type_of_ad:any;
+  container_type_id:any;
+  container_type:any;
+  fileName?: string
+  file?: File
+  price:any;
+status:any;
+quantity:any;
+size:any;
+port_id:any;
+contents:any;
+free_days:any;
+per_diem:any;
+port_of_ad:any;
+pickup_charges:any;
   @Input() portCode!: string;
   @Input() portId!: number;
   @Input() containersize!: number;
@@ -33,13 +61,18 @@ export class FormComponent implements OnInit {
   @Input() DeficitContainerTypesByPort!: string[];
   @Input() DeficitlusContainerSizesByPort!: number[];
   filteredInventoryList : Inventory[] = [];
+  showFile:boolean = false
   surplusCount: number | null = null;
   deficitCount: number | null = null; 
+  statusMsg?:string
   constructor(
     private forecastingtableService: ForecastingTableService,
     private sessionService: SessionService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private dialog:MatDialog,
+    private snackBar: MatSnackBar,
+    private postAdService: PostAdService
   ) {}
   ngOnInit(): void {
   
@@ -82,8 +115,32 @@ export class FormComponent implements OnInit {
  
   openForm(portCode: string) {
     this.portCode = portCode;
-    this.updateSurplusCount(this.portcode,this.surpluscontainerType,this.surpluscontainerSize);
-    this.updateDeficitCount(this.portcode,this.deifcitcontainerType,this.deficitcontainerSize);
+    this.forecastingtableService.getAllPorts().subscribe(
+      (data: any[]) => {   
+        this.port_list = data;
+        console.log("Port list fetched: ", this.port_list);
+  
+        // Call a function to retrieve portname based on portCode
+        const portName = this.getPortNameByCode(portCode);
+        console.log("Port name for port code " + portCode + ": " + portName);
+  
+        // Updated variable names for consistency
+        this.updateSurplusCount(this.portCode, this.surpluscontainerType, this.surpluscontainerSize);
+        this.updateDeficitCount(this.portCode, this.deifcitcontainerType, this.deficitcontainerSize);
+      },
+      error => {
+        console.log("Ports loading error: " + error);
+      }
+    );
+  }
+  getPortNameByCode(portCode: string): string {
+    debugger
+    const port = this.port_list.find(port => port.portcode === portCode);
+    if (port) {
+      return port.portname;
+    } else {
+      return 'Port not found'; // Handle the case where the portcode is not found
+    }
   }
   onDropdownChange() {
     
@@ -91,6 +148,8 @@ export class FormComponent implements OnInit {
     this.updateSurplusCount(this.portCode, this.surpluscontainerType, this.surpluscontainerSize);
   }
 }
+
+
 ondeficitDropdownChange() {
   
   if (this.deifcitcontainerType && this.deficitcontainerSize) {
@@ -105,6 +164,29 @@ isOptimizedViewEnabled(): boolean {
   );
 }
 
+DisplayPostForm() {
+  this.ad_type = 'container';
+  console.log('Before opening dialog');
+  debugger;
+
+  // Open the PostAdComponent dialog
+  const dialogRef = this.dialog.open(PostAdComponent, {
+    data: {
+      type: this.ad_type,
+      ContinueDraft: 0,
+      Approve: 0,
+      containerType: this.surpluscontainerType,
+      containerSize: this.surpluscontainerSize
+    }
+    
+  });
+
+  console.log('After opening dialog');
+  debugger;
+
+
+}
+
 
 updateSurplusCount(portCode: any, surpluscontainerType: any, surpluscontainerSize: any) {
   debugger;
@@ -113,6 +195,8 @@ updateSurplusCount(portCode: any, surpluscontainerType: any, surpluscontainerSiz
   const selectedPort = this.port_list.find((port: { port_code: any; }) => port.port_code === portCode);
   console.log("Selected Port:", selectedPort);
   if (selectedPort) {
+    const selectedPortName = selectedPort.port_name;
+    console.log("Selected Port Name:", selectedPortName);
     const port_id = selectedPort.port_id;
     console.log("Port ID for selected portCode:", port_id);
     const inventoryForPort = this.inventory_list_by_companyId.filter((item: Inventory) => {

@@ -1,13 +1,13 @@
 import { Component, OnInit,Input, Inject} from '@angular/core';
 import { Select, initTE } from "tw-elements";
 import { FormGroup } from '@angular/forms';
-
+import { MatDialog } from '@angular/material/dialog';
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import * as XLSX from 'xlsx'
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, Routes } from '@angular/router';
 
 import { filter, map } from 'rxjs';
 import { NumberSymbol } from '@angular/common';
@@ -32,6 +32,7 @@ export interface Containers {
   styleUrls: ['./post-ad.component.css']
 })
 export class PostAdComponent implements OnInit{
+ 
   ContinueDraft:any;
   adId:any;
   contractForm!: FormGroup;
@@ -82,12 +83,16 @@ port_of_ad:any;
 pickup_charges:any;
 public isButtonDisabled: boolean = false;
 Approve: any;
+  containerSize: any;
 
 
 
   constructor(@Inject(MAT_DIALOG_DATA)public data:any,private snackBar: MatSnackBar, private ref:MatDialogRef<PostAdComponent>,private postAdService: PostAdService,private router:Router,private sessionService: SessionService,private viewotherads:ViewOtherAdsService) {
+    this.container_type = data.containerType;
+    this.size = data.containerSize;
   }
 
+  
   addExcel(): void {
 
     if(this.y==1){
@@ -310,7 +315,9 @@ this.type=this.data.type;
       snackBarConfig
     );
   }
-
+  // closeDialog() {
+  //   this.dialogRef.close();
+  // }
  getWeekDifference(from_date: Date, expiry_date: Date): number {
   const millisecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
   const differenceInMilliseconds = expiry_date.getTime() - from_date.getTime();
@@ -340,19 +347,23 @@ capitalizeFirstLetter(text: string): string {
           setTimeout(()=> {this.statusMsg = ""},2000)
           this.clear()
 
-          window.location.reload()
+          this.router.navigate(['/my-ad']); 
+         
           this.isLoading=false;
+          this.closeDialog();
 
         } else {
           this.statusMsg = 'Failed';
           console.log(response.status);
           this.isLoading=false;
+          
         }
       });
     }
     else{
       alert("Please Fill the Mandatory Fields")
       this.isLoading=false;
+      
     }
   }
 
@@ -368,10 +379,13 @@ capitalizeFirstLetter(text: string): string {
          this.statusMsg = 'Success';
          setTimeout(()=> {this.statusMsg = ""},2000)
          this.clear()
-         window.location.reload()
+          this.router.navigate(['/my-ad']); 
+          this.closeDialog();
+         
        } else {
          this.statusMsg = 'Failed';
          console.log(response.status) ;
+         
        }
      });
      this.isLoading=false;
@@ -383,6 +397,9 @@ capitalizeFirstLetter(text: string): string {
 
   }
     
+  }
+  closeDialog() {
+    this.ref.close();
   }
 
   continueDraft(ad_id: number){
