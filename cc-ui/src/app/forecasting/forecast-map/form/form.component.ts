@@ -15,6 +15,7 @@ import { PostAdService } from 'src/app/my-advertisement/post-ad/post-ad.service'
 export class FormComponent implements OnInit {
   port_of_departure:any;
 port_of_arrival:any;
+PortName: string = '';
   public isButtonDisabled: boolean = false;
   ad_type!: string;
   inventory_list_by_companyId: Inventory[] = [];
@@ -113,35 +114,12 @@ pickup_charges:any;
     console.log('to form', this.DeficitlusContainerSizesByPort);
   }
  
-  openForm(portCode: string) {
-    this.portCode = portCode;
-    this.forecastingtableService.getAllPorts().subscribe(
-      (data: any[]) => {   
-        this.port_list = data;
-        console.log("Port list fetched: ", this.port_list);
-  
-        // Call a function to retrieve portname based on portCode
-        const portName = this.getPortNameByCode(portCode);
-        console.log("Port name for port code " + portCode + ": " + portName);
-  
-        // Updated variable names for consistency
-        this.updateSurplusCount(this.portCode, this.surpluscontainerType, this.surpluscontainerSize);
-        this.updateDeficitCount(this.portCode, this.deifcitcontainerType, this.deficitcontainerSize);
-      },
-      error => {
-        console.log("Ports loading error: " + error);
-      }
-    );
-  }
-  getPortNameByCode(portCode: string): string {
-    debugger
-    const port = this.port_list.find(port => port.portcode === portCode);
-    if (port) {
-      return port.portname;
-    } else {
-      return 'Port not found'; // Handle the case where the portcode is not found
-    }
-  }
+  // openForm(portCode: string) {
+  //   this.portCode = portCode;
+  //   this.updateSurplusCount(this.portcode,this.surpluscontainerType,this.surpluscontainerSize);
+  //   this.updateDeficitCount(this.portcode,this.deifcitcontainerType,this.deficitcontainerSize);
+  // }
+ 
   onDropdownChange() {
     
   if (this.surpluscontainerType && this.surpluscontainerSize) {
