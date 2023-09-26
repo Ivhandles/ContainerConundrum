@@ -49,6 +49,7 @@ free_days:any;
 per_diem:any;
 port_of_ad:any;
 pickup_charges:any;
+@Input() port_name!:string;
   @Input() portCode!: string;
   @Input() portId!: number;
   @Input() containersize!: number;
@@ -106,12 +107,8 @@ pickup_charges:any;
         console.log("ports loading error:" +error);
       }
     );
-    console.log('to form', this.surplusPercentage);
-    console.log('to form', this.deficitPercentage);
-    console.log('to form', this.surplusContainerTypesByPort);
-    console.log('to form', this.surplusContainerSizesByPort);
-    console.log('to form', this.DeficitContainerTypesByPort);
-    console.log('to form', this.DeficitlusContainerSizesByPort);
+   
+   
   }
  
   // openForm(portCode: string) {
@@ -147,23 +144,31 @@ DisplayPostForm() {
   console.log('Before opening dialog');
   debugger;
 
-  // Open the PostAdComponent dialog
-  const dialogRef = this.dialog.open(PostAdComponent, {
-    data: {
-      type: this.ad_type,
-      ContinueDraft: 0,
-      Approve: 0,
-      containerType: this.surpluscontainerType,
-      containerSize: this.surpluscontainerSize
-    }
-    
-  });
+  // Assuming this.portCode is the selected portCode
+  const selectedPort = this.port_list.find((port: { port_code: any; }) => port.port_code === this.portCode);
+const selectedPortid = this.port_list.find((port: { port_code: any; }) => port.port_code === this.portCode);
+const portName = selectedPort ? selectedPort.port_name : '';
+const port_id = selectedPortid ? selectedPortid.port_id : null; // Add a default value or handle the case where selectedPortid is not found
+console.log("in form", portName);
+console.log("in form", port_id);
+const dialogRef = this.dialog.open(PostAdComponent, {
+  data: {
+    type: this.ad_type,
+    ContinueDraft: 0,
+    Approve: 0,
+    containerType: this.surpluscontainerType,
+    containerSize: this.surpluscontainerSize,
+    portCode: this.portCode,
+    portName: portName ,
+    port_id:port_id
+  }
+});
 
-  console.log('After opening dialog');
+  
+console.log("to post ad",portName)
   debugger;
-
-
 }
+
 
 
 updateSurplusCount(portCode: any, surpluscontainerType: any, surpluscontainerSize: any) {

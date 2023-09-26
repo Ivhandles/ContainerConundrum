@@ -90,6 +90,10 @@ Approve: any;
   constructor(@Inject(MAT_DIALOG_DATA)public data:any,private snackBar: MatSnackBar, private ref:MatDialogRef<PostAdComponent>,private postAdService: PostAdService,private router:Router,private sessionService: SessionService,private viewotherads:ViewOtherAdsService) {
     this.container_type = data.containerType;
     this.size = data.containerSize;
+    this.port_of_ad = data.portName;
+    this.port_id = data.port_id;
+ console.log("in post ad",this.port_of_ad)
+ console.log("in post ad port_id",this.port_id)
   }
 
   
@@ -336,7 +340,7 @@ capitalizeFirstLetter(text: string): string {
     this.isLoading=true;
   if(this.operation=="PostAd"){
     
-    if (this.from_date && this.expiry_date && this.type_of_ad && this.price && this.file && this.container_type && this.size && this.type_of_ad) {
+    if (this.from_date && this.expiry_date && this.type_of_ad && this.price && this.file && this.container_type && this.size && this.type_of_ad ) {
 
     debugger
       this.postAdService.uploadFile(this.file,this.from_date,this.expiry_date,this.type_of_ad,this.container_type,this.size,this.price,this.quantity,this.port_id, this.userId, this.companyId, this.contents,this.port_of_departure,this.port_of_arrival,this.free_days,this.per_diem,this.pickup_charges,this.operation,this.port_of_ad,this.type).subscribe((response: any) => {
