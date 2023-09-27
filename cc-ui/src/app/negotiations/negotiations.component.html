@@ -256,7 +256,7 @@
               <div class="flex flex-row gap-2">
 
                 <div [ngSwitch]="ad_type">
-                  <div class="flex flex-col" *ngSwitchCase="'container'">
+                  <div class="flex flex-col" *ngIf="ad_type==='container'&& n.negotiation_type!='oneway'">
                     <div>
                       <i class="material-icons mr-1 text-xs">place</i>Port of Ad
                     </div>
@@ -265,7 +265,7 @@
                     </div>
                   </div>
                 
-                 <div class="flex flex-col" *ngSwitchCase="'space'">
+                 <div class="flex flex-col" *ngIf="ad_type==='space'">
                     <div class="flex flex-row gap-1">
                       <div>
                         <i class="material-icons mr-1 text-xs">place</i>Departure
@@ -284,6 +284,24 @@
                     </div>
                   </div>
                   
+                  <div class="flex flex-col" *ngIf="ad_type==='container'&& n.negotiation_type=='oneway'">
+                    <div class="flex flex-row gap-1">
+                      <div>
+                        <i class="material-icons mr-1 text-xs">place</i>Departure
+                      </div>
+                      <div class="ml-2">
+                        <i class="material-icons mr-1 text-xs">place</i>Arrival
+                      </div>
+                    </div>
+                    <div class="flex flex-row gap-1">
+                      <div class="gray-highlights ml-3">
+                        {{AdsDeparturePort[n.ad_id]}}
+                      </div>
+                      <div class="gray-highlights ml-6">
+                        {{AdsArrivalPort[n.ad_id]}}
+                      </div>
+                    </div>
+                  </div>
                   
                 </div>
                 
