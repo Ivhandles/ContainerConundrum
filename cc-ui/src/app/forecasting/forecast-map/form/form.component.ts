@@ -132,12 +132,16 @@ ondeficitDropdownChange() {
   }
 }
 isOptimizedViewEnabled(): boolean {
- 
-  return (
-    (this.surpluscontainerType && this.surpluscontainerSize) ||
-    (this.deifcitcontainerType && this.deficitcontainerSize)
-  );
+  const surplusTypeValid = this.surpluscontainerType !== 'Select the Type';
+  const surplusSizeValid = typeof this.surpluscontainerSize === 'string' && this.surpluscontainerSize !== 'Select the Size';
+
+  const deficitTypeValid = this.deifcitcontainerType !== 'Select the Type';
+  const deficitSizeValid = typeof this.deficitcontainerSize === 'string' && this.deficitcontainerSize !== 'Select the Size';
+
+  return (surplusTypeValid && surplusSizeValid) || (deficitTypeValid && deficitSizeValid);
 }
+
+
 
 DisplayPostForm() {
   this.ad_type = 'container';
