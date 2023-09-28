@@ -54,14 +54,20 @@ port_of_ad:any;
 pickup_charges:any;
 @Input() isSurplusAreaSelected: boolean = false ;
 @Input() isDeficitAreaSelected:boolean = false;
+
 @Input() portData!:any;
+
+
 @Input() port_name!:string;
   @Input() portCode!: string;
   @Input() portId!: number;
   @Input() containersize!: number;
   @Input() containertype!: string;
   @Input() containerTypes!: string[];
+
   @Input() containerSizes!: string[];
+
+
   @Input() surplus!: number;
   @Input() deficit!: number;
   @Input() surplusPercentage!: number;
@@ -116,16 +122,19 @@ pickup_charges:any;
     private postAdService: PostAdService
   ) {}
   ngOnInit(): void {
-  
-  
+
   console.log("in form value s passed",this.isSurplusAreaSelected)
   console.log("in form value d passed",this.isDeficitAreaSelected)
   console.log("in form",this.surplus);
   console.log("in form d",this.deficit);
+
   console.log("in form dfddfd",this.deficitPercentage);
   console.log("in form ct passed",this.containerTypes);
   console.log("in form cs passed",this.containerSizes);
   console.log("in form fggfg passed",this.portData);
+
+  console.log("in form yt",this.containerTypes);
+
     this.sessionService.getCompanyId().subscribe(
       (companyId: number) => {
         this.companyId = companyId;

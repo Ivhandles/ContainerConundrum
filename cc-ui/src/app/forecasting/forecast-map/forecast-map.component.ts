@@ -289,6 +289,15 @@ debugger
     this.markers = [];
     this.isSurplusAreaSelected = true; // Set the Surplus Area selected flag to true
   
+
+
+ 
+  viewSurplus() {
+    debugger;
+    this.markers = [];
+    this.isSurplusAreaSelected = true; // Set the Surplus Area selected flag to true
+  
+
     this.forecastService.getSurplus(this.companyId).subscribe(data => {
       this.portData = data;
       console.log("after view surplus", this.portData);
@@ -302,15 +311,22 @@ debugger
         this.noPorts = true;
       }
   
+
       // Initialize arrays to store portCode-containerType and portCode-containerSize pairs
       const portCodeContainerTypes: string[] = [];
       const portCodeContainerSizes: string[] = [];
   
       // Extract and store portCode-containerType and portCode-containerSize pairs
+
+      // Initialize the object for storing container types by port code
+      this.containerTypesByPort = {};
+  
+
       for (const port of this.portData) {
         if (port.surplus > port.deficit) {
           // Extract and concatenate the container types from this port
           const containerTypes = port.containertype.split(',').map((type: string) => type.trim());
+
   
           // Loop through containerTypes and create the desired format
           for (const containerType of containerTypes) {
@@ -323,7 +339,11 @@ debugger
             const portCodeContainerSize = `${port.portCode}: ${port.containersize}`;
             portCodeContainerSizes.push(portCodeContainerSize);
           }
-  
+
+          
+          // Store the container types in the object using the port code as the key
+          this.containerTypesByPort[port.portCode] = containerTypes;
+
           let iconUrl = "../assets/images/green-dot.png";
           const mapMarker = new google.maps.Marker({
             position: { lat: port.latitude, lng: port.longitude },
@@ -340,6 +360,7 @@ debugger
   
           const factory = this.resolver.resolveComponentFactory(FormComponent);
           const componentRef = factory.create(this.viewContainerRef.injector);
+
           componentRef.instance.portData = this.portData; 
           console.log("dfdf",this.portData);
           componentRef.instance.portData = port.portData;
@@ -350,6 +371,16 @@ debugger
           componentRef.instance.containerTypes = portCodeContainerTypes;
           componentRef.instance.containerSizes = portCodeContainerSizes; // Use containerSizes
   
+
+  
+          componentRef.instance.portCode = port.portCode;
+          componentRef.instance.portId = port.portId;
+          componentRef.instance.surplus = port.surplus;
+          console.log("in forecast", port.surplus);
+          componentRef.instance.containerTypes = containerTypes; // Pass the array of container types
+          console.log("in forecast ct",containerTypes);
+          componentRef.instance.containersize = port.containersize;
+
           componentRef.instance.isSurplusAreaSelected = this.isSurplusAreaSelected;
   
           this.appRef.attachView(componentRef.hostView);
@@ -362,6 +393,7 @@ debugger
           this.markers.push(mapMarker);
         }
       }
+
   
       // Now, portCodeContainerTypes contains the portCode-containerType pairs
       console.log('PortCode-ContainerTypes:', portCodeContainerTypes);
@@ -373,6 +405,11 @@ debugger
   
   
   
+
+    });
+  }
+  
+
   getPortName(portId: number): string {
     const port = this.port_list.find((p: { port_id: number, port_name: string }) => p.port_id === portId);
     return port ? port.port_name : '';
