@@ -71,6 +71,7 @@ export class ViewOtherAdsService {
 
   }
 
+  
   StartNegotiation(ad_id: number,company_id: number, user_id: number): Observable<any> {
     const url = this.apiService.getFullUrl(`${this.startNUrl}?ad_id=${ad_id}&company_id=${company_id}&user_id=${user_id}`);
     return this.http.post(url,null);
