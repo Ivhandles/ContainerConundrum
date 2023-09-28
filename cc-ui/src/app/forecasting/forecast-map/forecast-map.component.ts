@@ -11,6 +11,9 @@ import { ForecastingTableService } from '../forecasting-table-view/forecasting-t
   styleUrls: ['./forecast-map.component.css']
 })
 export class ForecastMapComponent implements OnInit,AfterViewInit  {
+  containerTypesByPort: { [key: string]: string[] } = {};
+  isSurplusAreaSelected: boolean = false;
+  isDeficitAreaSelected:boolean = false;
   @ViewChild('mapElement') mapElement!: ElementRef;
   @ViewChild('port', { static: false }) portElement!: ElementRef;
   noPorts = false
@@ -62,6 +65,7 @@ totalDeficitPercentage: number = 0;
       this.router.navigate(['/forecasting-table-view']);
     }
     if (this.options[index] === 'Map') {
+      window.location.reload();
       this.router.navigate(['/forecast-map']);
     }
     if (this.options[index] === 'Surplus Area')
@@ -76,7 +80,7 @@ totalDeficitPercentage: number = 0;
    surplusMarkers: google.maps.Marker[] = [];
  deficitMarkers: google.maps.Marker[] = [];
  ngAfterViewInit() {
-
+debugger
   if (this.portElement) {
     // Access the selected value
     this.selectedPort = this.portElement.nativeElement.value;
@@ -210,6 +214,7 @@ clearMarkersForPort(port: any) {
 createMarker(port: any, iconUrl: string, surplusPercentage: number, deficitPercentage: number,  surplusContainerTypesByPort: string[],
   surplusContainerSizesByPort: number[],DeficitContainerTypesByPort: string[],
   DeficitlusContainerSizesByPort: number[]): google.maps.Marker {
+    debugger
   const mapMarker = new google.maps.Marker({
     position: { lat: port.latitude, lng: port.longitude },
     map: this.map,
@@ -249,7 +254,7 @@ createMarker(port: any, iconUrl: string, surplusPercentage: number, deficitPerce
   mapMarker.addListener('click', () => {
     infoWindow.open(this.map, mapMarker);
   });
-
+debugger
   this.markers.push(mapMarker);
   return mapMarker;
 }
@@ -284,24 +289,35 @@ createMarker(port: any, iconUrl: string, surplusPercentage: number, deficitPerce
   
   
  
-  viewSurplus(){
-  
+  viewSurplus() {
+    debugger;
     this.markers = [];
-      this.forecastService.getSurplus(this.companyId).subscribe(data => {
+    this.isSurplusAreaSelected = true; // Set the Surplus Area selected flag to true
   
-        this.portData = data;
-        if (this.portData && this.portData.length > 0) {
-          this.map = new google.maps.Map(this.mapElement.nativeElement, {
-            center: { lat: +this.portData[0].latitude, lng: +this.portData[0].longitude },
-            zoom: 3,
-            mapId: '2b03aff8b2fb72a3'
-          });
-        } else {
-          this.noPorts = true;
-        }
-     
-        for (const port of this.portData) {
-          if (port.surplus> port.deficit){
+    this.forecastService.getSurplus(this.companyId).subscribe(data => {
+      this.portData = data;
+      console.log("after view surplus", this.portData);
+      if (this.portData && this.portData.length > 0) {
+        this.map = new google.maps.Map(this.mapElement.nativeElement, {
+          center: { lat: +this.portData[0].latitude, lng: +this.portData[0].longitude },
+          zoom: 3,
+          mapId: '2b03aff8b2fb72a3'
+        });
+      } else {
+        this.noPorts = true;
+      }
+  
+      // Initialize the object for storing container types by port code
+      this.containerTypesByPort = {};
+  
+      for (const port of this.portData) {
+        if (port.surplus > port.deficit) {
+          // Extract and concatenate the container types from this port
+          const containerTypes = port.containertype.split(',').map((type: string) => type.trim());
+          
+          // Store the container types in the object using the port code as the key
+          this.containerTypesByPort[port.portCode] = containerTypes;
+  
           let iconUrl = "../assets/images/green-dot.png";
           const mapMarker = new google.maps.Marker({
             position: { lat: port.latitude, lng: port.longitude },
@@ -315,28 +331,32 @@ createMarker(port: any, iconUrl: string, surplusPercentage: number, deficitPerce
           });
           const infoWindow = new google.maps.InfoWindow();
           infoWindow.setPosition({ lat: port.latitude, lng: port.longitude })
- 
+  
           const factory = this.resolver.resolveComponentFactory(FormComponent);
           const componentRef = factory.create(this.viewContainerRef.injector);
-         
+  
           componentRef.instance.portCode = port.portCode;
           componentRef.instance.portId = port.portId;
           componentRef.instance.surplus = port.surplus;
-          componentRef.instance.deficit = port.deficit;
-          
-          componentRef.instance.containertype=port.containertype;
-          componentRef.instance.containersize=port.containersize
+          console.log("in forecast", port.surplus);
+          componentRef.instance.containerTypes = containerTypes; // Pass the array of container types
+          console.log("in forecast ct",containerTypes);
+          componentRef.instance.containersize = port.containersize;
+          componentRef.instance.isSurplusAreaSelected = this.isSurplusAreaSelected;
+  
           this.appRef.attachView(componentRef.hostView);
           infoWindow.setContent(componentRef.location.nativeElement);
   
           mapMarker.addListener('click', () => {
+            debugger;
             infoWindow.open(this.map, mapMarker);
           });
           this.markers.push(mapMarker);
         }
-        }
-      })
+      }
+    });
   }
+  
   getPortName(portId: number): string {
     const port = this.port_list.find((p: { port_id: number, port_name: string }) => p.port_id === portId);
     return port ? port.port_name : '';
@@ -376,7 +396,9 @@ createMarker(port: any, iconUrl: string, surplusPercentage: number, deficitPerce
   XLSX.writeFile(workbook, excelFileName);
 }
   viewDeficit(){
+    debugger
     this.markers = []
+    this.isDeficitAreaSelected = true;
     for (const marker of this.markers) {
       marker.setMap(null);
     }
@@ -415,6 +437,7 @@ createMarker(port: any, iconUrl: string, surplusPercentage: number, deficitPerce
         componentRef.instance.portCode = port.portCode;
         componentRef.instance.portId = port.portId;
         componentRef.instance.surplus = port.surplus;
+        componentRef.instance.isDeficitAreaSelected = this.isDeficitAreaSelected;
         componentRef.instance.deficit = port.deficit;
         componentRef.instance.containertype=port.containertype;
         componentRef.instance.containersize=port.containersize
