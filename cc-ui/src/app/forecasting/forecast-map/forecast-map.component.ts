@@ -431,9 +431,26 @@ debugger
       } else {
         this.noPorts = true;
       }
-
+      const deficitContainerTypes: string[] = [];
+      const deficitContainerSizes: string[] = [];
       for (const port of this.portData) {
         if (port.deficit> port.surplus){
+
+          const containerTypes = port.containertype.split(',').map((type: string) => type.trim());
+  
+          // Loop through containerTypes and create the desired format
+          for (const containerType of containerTypes) {
+            const deficitContainerType = `${port.portCode}: ${containerType}`;
+            deficitContainerTypes.push(deficitContainerType);
+          }
+  
+          if (Number.isInteger(port.containersize)) {
+            const deficitContainerSize = `${port.portCode}: ${port.containersize}`;
+            deficitContainerSizes.push(deficitContainerSize);
+          }
+
+
+
         let iconUrl = "../assets/images/red-dot.png";
         const mapMarker = new google.maps.Marker({
           position: { lat: port.latitude, lng: port.longitude },
@@ -453,6 +470,8 @@ debugger
         componentRef.instance.portCode = port.portCode;
         componentRef.instance.portId = port.portId;
         componentRef.instance.surplus = port.surplus;
+        componentRef.instance.deficitcontainerTypes = deficitContainerTypes;
+        componentRef.instance.deficitcontainersizes = deficitContainerSizes;
         componentRef.instance.isDeficitAreaSelected = this.isDeficitAreaSelected;
         componentRef.instance.deficit = port.deficit;
         componentRef.instance.containertype=port.containertype;
@@ -465,8 +484,12 @@ debugger
         });
         this.markers.push(mapMarker);
       }
+  
       }
+      console.log('PortCode-ContainerTypes deficit:', deficitContainerTypes);
+      console.log('PortCode-ContainerSize deficit:', deficitContainerSizes);
     })
+   
 }
 
 

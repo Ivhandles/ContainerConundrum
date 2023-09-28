@@ -221,7 +221,8 @@
           <div class="col-span-1 text-xs">Deficit</div>
           <div></div>
           <div class="flex flex-row justify-end">
-            {{ deficit | number:'1.0-0' }}
+            <span *ngIf="deifcitTypes && deficitContainerSize">{{ totalDeficit | number:'1.0-0' }}</span>
+            <span *ngIf="!deifcitTypes || !deficitContainerSize">{{ deficit | number:'1.0-0' }}</span>
             <svg class="mt-1" width="10" height="10">
               <polygon points="0 0, 10 0, 5 10" fill="red" />
             </svg>
@@ -236,10 +237,10 @@
          
           <div class="col-span-2 text-xs">Container Type</div>
           <div class="text-right">
-              <select class="custom-select-deficit"[(ngModel)]="deifcitcontainerType" (change)="ondeficitDropdownChange()">
+              <select class="custom-select-deficit"[(ngModel)]="deifcitTypes" (ngModelChange)="onDeficitSelectionChange()" >
                   <option selected >Select the Type</option>
-                  <option *ngFor="let deifcitcontainerType of DeficitContainerTypesByPort" [value]="deifcitcontainerType">{{
-                      deifcitcontainerType }}</option>
+                  <option *ngFor="let deifcitType of filtereddeficittype" [value]="deifcitType">{{
+                    deifcitType }}</option>
               </select>
           </div>
          
@@ -248,10 +249,10 @@
 
           <div class="col-span-2 text-xs">Container Size</div>
           <div class="text-right">
-              <select [(ngModel)]="deficitcontainerSize" (change)="ondeficitDropdownChange()">
+              <select [(ngModel)]="deficitContainerSize" (ngModelChange)="onDeficitSelectionChange()" >
                   <option selected >Select the Size</option>
-                  <option *ngFor="let deficitcontainerSize of DeficitlusContainerSizesByPort" [value]="deficitcontainerSize">{{
-                      deficitcontainerSize }}</option>
+                  <option *ngFor="let deficit_ContainerSize of deficitContainerSizes" [value]="deficit_ContainerSize">{{
+                    deficit_ContainerSize }}</option>
               </select>
           </div>
 

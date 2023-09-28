@@ -28,6 +28,7 @@ PortName: string = '';
   port_list: any[] = [];
   portcode: any;
   container_types:any;
+  deifcitTypes:any;
   container_size:any;
   surpluscontainerType:any;
   deifcitcontainerType:any;
@@ -39,7 +40,9 @@ PortName: string = '';
   type_of_ad:any;
   container_type_id:any;
   totalSurplus: number = 0;
+  totalDeficit:number = 0;
   container_type:any;
+  deficitContainerSize:any;
   fileName?: string
   file?: File
   price:any;
@@ -61,6 +64,8 @@ pickup_charges:any;
   @Input() containersize!: number;
   @Input() containertype!: string;
   @Input() containerTypes!: string[];
+  @Input() deficitcontainerTypes!: string[];
+  @Input() deficitcontainersizes!: string[];
   @Input() containerSizes!: string[];
   @Input() surplus!: number;
   @Input() deficit!: number;
@@ -98,8 +103,34 @@ pickup_charges:any;
       });
     }
   }
-  
-  
+  get filtereddeficittype(): string[] {
+    if (this.portCode) {
+      
+      return this.deficitcontainerTypes
+        .filter(containertype => containertype.startsWith(this.portCode))
+        .map(containertype => containertype.replace(`${this.portCode}: `, ''));
+    } else {
+      
+      return this.deficitcontainerTypes;
+    }
+  }
+  get deficitContainerSizes(): number[] {
+    if (this.portCode) {
+      // Filter containerSizes based on selectedPortCodes and extract integer values
+      return this.deficitcontainersizes
+        .filter(containerSize => this.portCode.includes(containerSize.split(':')[0]))
+        .map(containerSize => {
+          const intValue = parseInt(containerSize.split(':')[1].trim(), 10);
+          return isNaN(intValue) ? 0 : intValue;
+        });
+    } else {
+      // If no port codes are selected, show all container size integer values
+      return this.deficitcontainersizes.map(containerSize => {
+        const intValue = parseInt(containerSize.split(':')[1].trim(), 10);
+        return isNaN(intValue) ? 0 : intValue;
+      });
+    }
+  }
   @Input() DeficitlusContainerSizesByPort!: number[];
   filteredInventoryList : Inventory[] = [];
   showFile:boolean = false
@@ -225,7 +256,57 @@ SurplusCount(portCode: string, container_types: any, container_size: any) {
   }
 }
 
+onDeficitSelectionChange() {
+  debugger
+if (this.deifcitTypes && this.deficitContainerSize) {
+  debugger
+  this.DeficitCount(this.portCode, this.deifcitTypes, this.deficitContainerSize);
+}
+}
+  DeficitCount(portCode: string, deifcitTypes: any, deficitContainerSize: any) {
+    console.log("This method is called with:", portCode, deifcitTypes, deficitContainerSize);
+  let selecteddeficitPortId: number | null = null;
+  this.totalDeficit = 0; // Initialize totalSurplus to 0
+  
+  // Find the selectedPortId based on portCode
+  for (const port of this.port_list) {
+    if (port.port_code === portCode) {
+      selecteddeficitPortId = port.port_id;
+      break;
+    }
+  }
+  
+  if (selecteddeficitPortId !== null) {
+    console.log("Selected Port ID:", selecteddeficitPortId);
 
+    // Step 1: Filter items with matching port_id
+    const matchingdeficitPortItems = this.inventory_list_by_companyId.filter(item => item.port_id === selecteddeficitPortId);
+
+    // Step 2: Filter items with matching container_type
+    const matchingdeficitTypeItems = matchingdeficitPortItems.filter(item => item.container_type === deifcitTypes);
+
+    // Step 3: Filter items with matching container_size and calculate total surplus
+    matchingdeficitTypeItems
+    .filter(item => {
+      // Parse the selected container_size to an integer
+      const selectedSize = deficitContainerSize !== null ? parseInt(deficitContainerSize, 10) : null;
+      // Convert the item's container_size to a number
+      const itemSize = typeof item.container_size === 'number' ? item.container_size : parseInt(item.container_size, 10);
+      // Check if the item's container_size matches the selectedSize
+      return selectedSize === null || itemSize === selectedSize;
+    })
+    .forEach(item => {
+      this.totalDeficit += item.deficit; // Add the item's surplus to the total
+    });
+
+    // Now, totalSurplus contains the sum of surplus values for matching items
+    console.log("Total Surplus Value for Matching Items:", this.totalDeficit);
+
+    // You can use or display the totalSurplus value as needed
+  } else {
+    console.log("Invalid portCode. No matching port_id found.");
+  }
+  }
 
 
 
