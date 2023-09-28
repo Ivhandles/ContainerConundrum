@@ -152,19 +152,28 @@
       <div class="col-span-1 text-xs">Surplus</div>
       <div></div>
       <div class="flex flex-row justify-end">
+
         <span *ngIf="container_types && container_size">{{ totalSurplus | number:'1.0-0' }}</span>
         <span *ngIf="!container_types || !container_size">{{ surplus | number:'1.0-0' }}</span>
+
+        <span>{{ surplus | number:'1.0-0' }}</span>
+
         <svg class="mt-1" width="10" height="10">
           <polygon points="5 0, 10 10, 0 10" fill="green" />
         </svg>
       </div>
+
       
       
+
+
+
       <!-- Display Container Type and Container Size -->
       <hr class="col-span-3">
 
       <div class="col-span-2 text-xs">Container Type</div>
       <div class="text-right">
+
         <select class="custom-select" [(ngModel)]="container_types"(ngModelChange)="onSelectionChange()">
           <option selected>Select the Type</option>
           <option *ngFor="let container_types of filteredContainerTypes" [value]="container_types">{{ container_types }}</option>
@@ -179,6 +188,22 @@
         </select>
       </div>
       
+
+        <select class="custom-select" [(ngModel)]="surpluscontainerType" (change)="onDropdownChange()">
+          <option selected>Select the Type</option>
+          <option *ngFor="let containertype of surplusContainerTypesByPort" [value]="containertype">{{ containertype }}</option>
+        </select>
+      </div>
+      
+
+      <div class="col-span-2 text-xs">Container Size</div>
+      <div class="text-right">
+        <select [(ngModel)]="surpluscontainerSize" (change)="onDropdownChange()">
+          <option selected>Select the Size</option>
+          <option *ngFor="let surpluscontainerSize of surplusContainerSizesByPort" [value]="surpluscontainerSize">{{ surpluscontainerSize }}</option>
+        </select>
+      </div>
+
 
       <div class="col-span-2 text-xs">EMPTY ACTUAL</div>
       <div class="text-right">600</div>
