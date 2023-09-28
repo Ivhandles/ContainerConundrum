@@ -27,6 +27,8 @@ PortName: string = '';
   surpluscontainerSize: number | null = null;
   port_list: any[] = [];
   portcode: any;
+  container_types:any;
+  container_size:any;
   surpluscontainerType:any;
   deifcitcontainerType:any;
   deficitcontainerSize:number | null = null;
@@ -36,6 +38,7 @@ PortName: string = '';
   userId: any;
   type_of_ad:any;
   container_type_id:any;
+  totalSurplus: number = 0;
   container_type:any;
   fileName?: string
   file?: File
@@ -51,12 +54,14 @@ port_of_ad:any;
 pickup_charges:any;
 @Input() isSurplusAreaSelected: boolean = false ;
 @Input() isDeficitAreaSelected:boolean = false;
+@Input() portData!:any;
 @Input() port_name!:string;
   @Input() portCode!: string;
   @Input() portId!: number;
   @Input() containersize!: number;
   @Input() containertype!: string;
   @Input() containerTypes!: string[];
+  @Input() containerSizes!: string[];
   @Input() surplus!: number;
   @Input() deficit!: number;
   @Input() surplusPercentage!: number;
@@ -64,6 +69,37 @@ pickup_charges:any;
   @Input() surplusContainerTypesByPort!: string[];
   @Input() surplusContainerSizesByPort!: number[];
   @Input() DeficitContainerTypesByPort!: string[];
+  ssurplusCount: any; 
+  get filteredContainerTypes(): string[] {
+    if (this.portCode) {
+      
+      return this.containerTypes
+        .filter(containertype => containertype.startsWith(this.portCode))
+        .map(containertype => containertype.replace(`${this.portCode}: `, ''));
+    } else {
+      
+      return this.containerTypes;
+    }
+  }
+  get filteredContainerSizes(): number[] {
+    if (this.portCode) {
+      // Filter containerSizes based on selectedPortCodes and extract integer values
+      return this.containerSizes
+        .filter(containerSize => this.portCode.includes(containerSize.split(':')[0]))
+        .map(containerSize => {
+          const intValue = parseInt(containerSize.split(':')[1].trim(), 10);
+          return isNaN(intValue) ? 0 : intValue;
+        });
+    } else {
+      // If no port codes are selected, show all container size integer values
+      return this.containerSizes.map(containerSize => {
+        const intValue = parseInt(containerSize.split(':')[1].trim(), 10);
+        return isNaN(intValue) ? 0 : intValue;
+      });
+    }
+  }
+  
+  
   @Input() DeficitlusContainerSizesByPort!: number[];
   filteredInventoryList : Inventory[] = [];
   showFile:boolean = false
@@ -80,11 +116,16 @@ pickup_charges:any;
     private postAdService: PostAdService
   ) {}
   ngOnInit(): void {
+  
+  
   console.log("in form value s passed",this.isSurplusAreaSelected)
   console.log("in form value d passed",this.isDeficitAreaSelected)
   console.log("in form",this.surplus);
   console.log("in form d",this.deficit);
-  console.log("in form yt",this.containerTypes);
+  console.log("in form dfddfd",this.deficitPercentage);
+  console.log("in form ct passed",this.containerTypes);
+  console.log("in form cs passed",this.containerSizes);
+  console.log("in form fggfg passed",this.portData);
     this.sessionService.getCompanyId().subscribe(
       (companyId: number) => {
         this.companyId = companyId;
@@ -125,11 +166,67 @@ pickup_charges:any;
   // }
  
   onDropdownChange() {
-    
+    debugger
   if (this.surpluscontainerType && this.surpluscontainerSize) {
+    debugger
     this.updateSurplusCount(this.portCode, this.surpluscontainerType, this.surpluscontainerSize);
   }
 }
+onSelectionChange() {
+  debugger
+if (this.container_types && this.container_size) {
+  debugger
+  this.SurplusCount(this.portCode, this.container_types, this.container_size);
+}
+}
+SurplusCount(portCode: string, container_types: any, container_size: any) {
+  debugger
+  console.log("This method is called with:", portCode, container_types, container_size);
+  let selectedPortId: number | null = null;
+  this.totalSurplus = 0; // Initialize totalSurplus to 0
+  
+  // Find the selectedPortId based on portCode
+  for (const port of this.port_list) {
+    if (port.port_code === portCode) {
+      selectedPortId = port.port_id;
+      break;
+    }
+  }
+  
+  if (selectedPortId !== null) {
+    console.log("Selected Port ID:", selectedPortId);
+
+    // Step 1: Filter items with matching port_id
+    const matchingPortItems = this.inventory_list_by_companyId.filter(item => item.port_id === selectedPortId);
+
+    // Step 2: Filter items with matching container_type
+    const matchingTypeItems = matchingPortItems.filter(item => item.container_type === container_types);
+
+    // Step 3: Filter items with matching container_size and calculate total surplus
+    matchingTypeItems
+    .filter(item => {
+      // Parse the selected container_size to an integer
+      const selectedSize = container_size !== null ? parseInt(container_size, 10) : null;
+      // Convert the item's container_size to a number
+      const itemSize = typeof item.container_size === 'number' ? item.container_size : parseInt(item.container_size, 10);
+      // Check if the item's container_size matches the selectedSize
+      return selectedSize === null || itemSize === selectedSize;
+    })
+    .forEach(item => {
+      this.totalSurplus += item.surplus; // Add the item's surplus to the total
+    });
+
+    // Now, totalSurplus contains the sum of surplus values for matching items
+    console.log("Total Surplus Value for Matching Items:", this.totalSurplus);
+
+    // You can use or display the totalSurplus value as needed
+  } else {
+    console.log("Invalid portCode. No matching port_id found.");
+  }
+}
+
+
+
 
 
 ondeficitDropdownChange() {
@@ -150,6 +247,7 @@ isOptimizedViewEnabled(): boolean {
 
 
 
+
 DisplayPostForm() {
   this.ad_type = 'container';
   console.log('Before opening dialog');
@@ -159,7 +257,7 @@ DisplayPostForm() {
   const selectedPort = this.port_list.find((port: { port_code: any; }) => port.port_code === this.portCode);
 const selectedPortid = this.port_list.find((port: { port_code: any; }) => port.port_code === this.portCode);
 const portName = selectedPort ? selectedPort.port_name : '';
-const port_id = selectedPortid ? selectedPortid.port_id : null; // Add a default value or handle the case where selectedPortid is not found
+const port_id = selectedPortid ? selectedPortid.port_id : null;
 console.log("in form", portName);
 console.log("in form", port_id);
 const dialogRef = this.dialog.open(PostAdComponent, {
@@ -200,14 +298,13 @@ updateSurplusCount(portCode: any, surpluscontainerType: any, surpluscontainerSiz
     const inventoryForContainerType = inventoryForPort.filter((item: Inventory) => {
       return item.container_type === surpluscontainerType;
     });
-    console.log("Inventory after filtering by container type:", inventoryForContainerType);
-    console.log("Selected surpluscontainerSize:", surpluscontainerSize);
+  
   const targetSize = parseInt(surpluscontainerSize, 10);
   const inventoryForContainerSize = inventoryForContainerType.filter((item: Inventory) => {
     const itemSize = typeof item.container_size === 'number' ? item.container_size : parseInt(item.container_size, 10);
     return itemSize === targetSize;
   });
-console.log("Inventory after filtering by container size:", inventoryForContainerSize);
+
     const finalFilteredInventory = inventoryForContainerSize;
 
     if (finalFilteredInventory.length > 0) {
@@ -225,28 +322,27 @@ console.log("Inventory after filtering by container size:", inventoryForContaine
 updateDeficitCount(portCode: any, deifcitcontainerType: any, deficitcontainerSize: any) {
   debugger;
   console.log('Current portCode:', portCode);
-  console.log('Port List:', this.port_list);
+ 
   const selectedPort = this.port_list.find((port: { port_code: any; }) => port.port_code === portCode);
-  console.log("Selected Port:", selectedPort);
+ 
   if (selectedPort) {
     const port_id = selectedPort.port_id;
-    console.log("Port ID for selected portCode:", port_id);
+   
     const inventoryForPort = this.inventory_list_by_companyId.filter((item: Inventory) => {
       return item.port_id === port_id;
     });
-    console.log("Inventory for Port:", inventoryForPort);
+   
     const inventoryForContainerType = inventoryForPort.filter((item: Inventory) => {
       return item.container_type === deifcitcontainerType;
     });
-    console.log("Inventory after filtering by container type:", inventoryForContainerType);
-    console.log("Selected surpluscontainerSize:", deficitcontainerSize);
+  
   const targetSize = parseInt(deficitcontainerSize, 10);
 
   const inventoryForContainerSize = inventoryForContainerType.filter((item: Inventory) => {
     const itemSize = typeof item.container_size === 'number' ? item.container_size : parseInt(item.container_size, 10);
     return itemSize === targetSize;
   });
-console.log("Inventory after filtering by container size:", inventoryForContainerSize);
+
     const finalFilteredInventory = inventoryForContainerSize;
     if (finalFilteredInventory.length > 0) {
       const selectedInventory = finalFilteredInventory[0];

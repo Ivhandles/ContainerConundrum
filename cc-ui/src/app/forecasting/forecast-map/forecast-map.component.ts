@@ -176,10 +176,7 @@ debugger
 
       
     }
-    console.log("Surplus Container Types Across All Ports:", surplusContainerTypesByPort);
-    console.log("Surplus Container Sizes Across All Ports:", surplusContainerSizesByPort);
-    console.log("Deficit Container Types Across All Ports:", DeficitContainerTypesByPort);
-    console.log("Deficit Container Sizes Across All Ports:", DeficitlusContainerSizesByPort);
+
   
   });
 }
@@ -287,8 +284,6 @@ debugger
     }
   }
   
-  
- 
   viewSurplus() {
     debugger;
     this.markers = [];
@@ -307,16 +302,27 @@ debugger
         this.noPorts = true;
       }
   
-      // Initialize the object for storing container types by port code
-      this.containerTypesByPort = {};
+      // Initialize arrays to store portCode-containerType and portCode-containerSize pairs
+      const portCodeContainerTypes: string[] = [];
+      const portCodeContainerSizes: string[] = [];
   
+      // Extract and store portCode-containerType and portCode-containerSize pairs
       for (const port of this.portData) {
         if (port.surplus > port.deficit) {
           // Extract and concatenate the container types from this port
           const containerTypes = port.containertype.split(',').map((type: string) => type.trim());
-          
-          // Store the container types in the object using the port code as the key
-          this.containerTypesByPort[port.portCode] = containerTypes;
+  
+          // Loop through containerTypes and create the desired format
+          for (const containerType of containerTypes) {
+            const portCodeContainerType = `${port.portCode}: ${containerType}`;
+            portCodeContainerTypes.push(portCodeContainerType);
+          }
+  
+          // Ensure containersize is a valid integer
+          if (Number.isInteger(port.containersize)) {
+            const portCodeContainerSize = `${port.portCode}: ${port.containersize}`;
+            portCodeContainerSizes.push(portCodeContainerSize);
+          }
   
           let iconUrl = "../assets/images/green-dot.png";
           const mapMarker = new google.maps.Marker({
@@ -334,14 +340,16 @@ debugger
   
           const factory = this.resolver.resolveComponentFactory(FormComponent);
           const componentRef = factory.create(this.viewContainerRef.injector);
-  
+          componentRef.instance.portData = this.portData; 
+          console.log("dfdf",this.portData);
+          componentRef.instance.portData = port.portData;
           componentRef.instance.portCode = port.portCode;
           componentRef.instance.portId = port.portId;
           componentRef.instance.surplus = port.surplus;
-          console.log("in forecast", port.surplus);
-          componentRef.instance.containerTypes = containerTypes; // Pass the array of container types
-          console.log("in forecast ct",containerTypes);
-          componentRef.instance.containersize = port.containersize;
+        
+          componentRef.instance.containerTypes = portCodeContainerTypes;
+          componentRef.instance.containerSizes = portCodeContainerSizes; // Use containerSizes
+  
           componentRef.instance.isSurplusAreaSelected = this.isSurplusAreaSelected;
   
           this.appRef.attachView(componentRef.hostView);
@@ -354,8 +362,16 @@ debugger
           this.markers.push(mapMarker);
         }
       }
+  
+      // Now, portCodeContainerTypes contains the portCode-containerType pairs
+      console.log('PortCode-ContainerTypes:', portCodeContainerTypes);
+  
+      // Now, portCodeContainerSizes contains the portCode-containerSize pairs
+      console.log('PortCode-ContainerSizes:', portCodeContainerSizes);
     });
   }
+  
+  
   
   getPortName(portId: number): string {
     const port = this.port_list.find((p: { port_id: number, port_name: string }) => p.port_id === portId);
