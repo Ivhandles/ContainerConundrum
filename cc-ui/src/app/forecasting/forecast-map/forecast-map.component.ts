@@ -284,11 +284,7 @@ debugger
     }
   }
   
-  viewSurplus() {
-    debugger;
-    this.markers = [];
-    this.isSurplusAreaSelected = true; // Set the Surplus Area selected flag to true
-  
+ 
 
 
  
@@ -406,8 +402,7 @@ debugger
   
   
 
-    });
-  }
+   
   
 
   getPortName(portId: number): string {
