@@ -107,7 +107,7 @@ debugger
     const DeficitContainerTypesByPort: { [key: string]: string[] } = {};
     const DeficitlusContainerSizesByPort: { [key: string]: number[] } = {};
 
-    
+    const uniqueSurplusContainerTypes = new Set<string>();
     for (const port of this.portData) {
       // Calculate the total surplus and deficit for each port code
       if (!portCodeTotals[port.portCode]) {
@@ -522,7 +522,7 @@ viewSurplus() {
         componentRef.instance.surplus = port.surplus;
         componentRef.instance.isDeficitAreaSelected = this.isDeficitAreaSelected;
         componentRef.instance.deficitTypes = DeficitContainerTypes;
-        componentRef.instance.deficitSizes = DeficitContainerSizes; // Use containerSizes
+        componentRef.instance.deficitSizes = DeficitContainerSizes; 
         componentRef.instance.Totaldeficit = TotalDeficitValues;
         componentRef.instance.deficit = port.deficit;
         componentRef.instance.containertype=port.containertype;
