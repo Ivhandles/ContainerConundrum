@@ -179,7 +179,8 @@ debugger
 
   
   });
-}
+ }
+
 
 
 
@@ -283,11 +284,6 @@ debugger
       }
     }
   }
-  
-  viewSurplus() {
-    debugger;
-    this.markers = [];
-    this.isSurplusAreaSelected = true; // Set the Surplus Area selected flag to true
   
 
 
@@ -406,9 +402,7 @@ debugger
   
   
 
-    });
-  }
-  
+ 
 
   getPortName(portId: number): string {
     const port = this.port_list.find((p: { port_id: number, port_name: string }) => p.port_id === portId);
