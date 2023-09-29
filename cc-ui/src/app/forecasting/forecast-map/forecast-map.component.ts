@@ -179,8 +179,7 @@ debugger
 
   
   });
- }
-
+}
 
 
 
@@ -285,6 +284,7 @@ debugger
     }
   }
   
+ 
 
 
  
@@ -402,7 +402,8 @@ debugger
   
   
 
- 
+   
+  
 
   getPortName(portId: number): string {
     const port = this.port_list.find((p: { port_id: number, port_name: string }) => p.port_id === portId);
