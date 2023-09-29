@@ -79,27 +79,39 @@ pickup_charges:any;
   @Input() surplusContainerTypesByPort!: string[];
   @Input() surplusContainerSizesByPort!: number[];
   @Input() DeficitContainerTypesByPort!: string[];
+  @Input() DeficitlusContainerSizesByPort!: number[];
   ssurplusCount: any; 
   get filteredContainerTypes(): string[] {
     if (this.portCode) {
       // Filter and remove the port code prefix from container types based on the selected port code
-      return this.containerTypes
+      const filteredTypes = this.containerTypes
         .filter(containertype => containertype.startsWith(this.portCode))
         .map(containertype => containertype.replace(`${this.portCode}: `, ''));
+  
+      // Remove duplicates from the filtered container types
+      const uniqueFilteredTypes = [...new Set(filteredTypes)];
+  
+      return uniqueFilteredTypes;
     } else {
       // If no port code is selected, return all container types without modification
       return this.containerTypes;
     }
   }
+  
   get filteredContainerSizes(): number[] {
     if (this.portCode) {
       // Filter containerSizes based on selectedPortCodes and extract integer values
-      return this.containerSizes
+      const filteredSizes = this.containerSizes
         .filter(containerSize => this.portCode.includes(containerSize.split(':')[0]))
         .map(containerSize => {
           const intValue = parseInt(containerSize.split(':')[1].trim(), 10);
           return isNaN(intValue) ? 0 : intValue;
         });
+  
+      // Remove duplicates from the filtered container sizes
+      const uniqueFilteredSizes = [...new Set(filteredSizes)];
+  
+      return uniqueFilteredSizes;
     } else {
       // If no port codes are selected, show all container size integer values
       return this.containerSizes.map(containerSize => {
@@ -108,6 +120,7 @@ pickup_charges:any;
       });
     }
   }
+  
   getSurplusValueForPortCode(portCode: string): string {
     debugger
     const matchedSurplusValue = this.Totalsurplus[portCode];
@@ -115,43 +128,75 @@ pickup_charges:any;
   }
   get filteredDeficitTypes(): string[] {
     if (this.portCode) {
-      // Filter and remove the port code prefix from container types based on the selected port code
-      return this.deficitTypes
-        .filter(containertype => containertype.startsWith(this.portCode))
-        .map(containertype => containertype.replace(`${this.portCode}: `, ''));
+      // Filter and remove the port code prefix from deficit types based on the selected port code
+      const filteredTypes = this.deficitTypes
+        .filter(deficitType => deficitType.startsWith(this.portCode))
+        .map(deficitType => deficitType.replace(`${this.portCode}: `, ''));
+  
+      // Remove duplicates from the filtered deficit types
+      const uniqueFilteredTypes = [...new Set(filteredTypes)];
+  
+      return uniqueFilteredTypes;
     } else {
-      // If no port code is selected, return all container types without modification
+      // If no port code is selected, return all deficit types without modification
       return this.deficitTypes;
     }
   }
+  
   get filteredDeficitSizes(): number[] {
     if (this.portCode) {
-      // Filter containerSizes based on selectedPortCodes and extract integer values
-      return this.deficitSizes
-        .filter(containerSize => this.portCode.includes(containerSize.split(':')[0]))
-        .map(containerSize => {
-          const intValue = parseInt(containerSize.split(':')[1].trim(), 10);
+      // Filter deficitSizes based on selectedPortCodes and extract integer values
+      const filteredSizes = this.deficitSizes
+        .filter(deficitSize => this.portCode.includes(deficitSize.split(':')[0]))
+        .map(deficitSize => {
+          const intValue = parseInt(deficitSize.split(':')[1].trim(), 10);
           return isNaN(intValue) ? 0 : intValue;
         });
+  
+      // Remove duplicates from the filtered deficit sizes
+      const uniqueFilteredSizes = [...new Set(filteredSizes)];
+  
+      return uniqueFilteredSizes;
     } else {
-      // If no port codes are selected, show all container size integer values
-      return this.deficitSizes.map(containerSize => {
-        const intValue = parseInt(containerSize.split(':')[1].trim(), 10);
+      // If no port codes are selected, show all deficit size integer values
+      return this.deficitSizes.map(deficitSize => {
+        const intValue = parseInt(deficitSize.split(':')[1].trim(), 10);
         return isNaN(intValue) ? 0 : intValue;
       });
     }
   }
+  
   getDeficitValueForPortCode(portCode: string): string {
     const matchedDeficitValue = this.Totaldeficit[portCode];
     return matchedDeficitValue ? matchedDeficitValue : '';
   }
+  get uniqueSurplusContainerTypes(): string[] {
+    // Use a Set to filter out duplicates
+    const uniqueTypes = new Set(this.surplusContainerTypesByPort);
+    return Array.from(uniqueTypes);
+  }
+  get uniqueContainerSizes(): number[] {
+    // Use a Set to filter out duplicate numbers
+    const uniqueSizes = Array.from(new Set(this.surplusContainerSizesByPort));
+    return uniqueSizes;
+  }
+  get uniqueDeficitContainerTypes(): string[] {
+    // Use a Set to filter out duplicates
+    const uniqueTypes = new Set(this.DeficitContainerTypesByPort);
+    return Array.from(uniqueTypes);
+  }
+  get uniqueDeficitContainerSizes(): number[] {
+    // Use a Set to filter out duplicate numbers
+    const uniqueSizes = Array.from(new Set(this.DeficitlusContainerSizesByPort));
+    return uniqueSizes;
+  }
   
-  @Input() DeficitlusContainerSizesByPort!: number[];
   filteredInventoryList : Inventory[] = [];
   showFile:boolean = false
   surplusCount: number | null = null;
   deficitCount: number | null = null; 
   statusMsg?:string
+
   constructor(
     private forecastingtableService: ForecastingTableService,
     private sessionService: SessionService,
@@ -160,14 +205,17 @@ pickup_charges:any;
     private dialog:MatDialog,
     private snackBar: MatSnackBar,
     private postAdService: PostAdService
-  ) {}
+  ) {
+    
+  }
+
   ngOnInit(): void {
 
   console.log("in form value s passed",this.isSurplusAreaSelected)
   console.log("in form value d passed",this.isDeficitAreaSelected)
   console.log("in form",this.surplus);
   console.log("in form d",this.deficit);
-
+ console.log(this.surplusContainerTypesByPort);
   console.log("in form dfddfd",this.deficitPercentage);
   console.log("in form ct passed to check",this.containerTypes);
   console.log("in form cs passed",this.containerSizes);
