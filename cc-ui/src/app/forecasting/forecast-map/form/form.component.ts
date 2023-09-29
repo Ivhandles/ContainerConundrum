@@ -29,6 +29,8 @@ PortName: string = '';
   portcode: any;
   container_types:any;
   container_size:any;
+  deifcit_Type:any;
+  deficit_Size:any
   surpluscontainerType:any;
   deifcitcontainerType:any;
   deficitcontainerSize:number | null = null;
@@ -39,6 +41,7 @@ PortName: string = '';
   type_of_ad:any;
   container_type_id:any;
   totalSurplus: number = 0;
+  totalDeficit:number = 0;
   container_type:any;
   fileName?: string
   file?: File
@@ -61,13 +64,14 @@ pickup_charges:any;
 @Input() port_name!:string;
   @Input() portCode!: string;
   @Input() portId!: number;
+  @Input() Totalsurplus: any;
   @Input() containersize!: number;
   @Input() containertype!: string;
   @Input() containerTypes!: string[];
-
   @Input() containerSizes!: string[];
-
-
+  @Input() deficitTypes!: string[];
+  @Input() deficitSizes!: string[];
+  @Input() Totaldeficit!: any;
   @Input() surplus!: number;
   @Input() deficit!: number;
   @Input() surplusPercentage!: number;
@@ -78,12 +82,12 @@ pickup_charges:any;
   ssurplusCount: any; 
   get filteredContainerTypes(): string[] {
     if (this.portCode) {
-      
+      // Filter and remove the port code prefix from container types based on the selected port code
       return this.containerTypes
         .filter(containertype => containertype.startsWith(this.portCode))
         .map(containertype => containertype.replace(`${this.portCode}: `, ''));
     } else {
-      
+      // If no port code is selected, return all container types without modification
       return this.containerTypes;
     }
   }
@@ -104,7 +108,42 @@ pickup_charges:any;
       });
     }
   }
-  
+  getSurplusValueForPortCode(portCode: string): string {
+    const matchedSurplusValue = this.Totalsurplus[portCode];
+    return matchedSurplusValue ? matchedSurplusValue : '';
+  }
+  get filteredDeficitTypes(): string[] {
+    if (this.portCode) {
+      // Filter and remove the port code prefix from container types based on the selected port code
+      return this.deficitTypes
+        .filter(containertype => containertype.startsWith(this.portCode))
+        .map(containertype => containertype.replace(`${this.portCode}: `, ''));
+    } else {
+      // If no port code is selected, return all container types without modification
+      return this.deficitTypes;
+    }
+  }
+  get filteredDeficitSizes(): number[] {
+    if (this.portCode) {
+      // Filter containerSizes based on selectedPortCodes and extract integer values
+      return this.deficitSizes
+        .filter(containerSize => this.portCode.includes(containerSize.split(':')[0]))
+        .map(containerSize => {
+          const intValue = parseInt(containerSize.split(':')[1].trim(), 10);
+          return isNaN(intValue) ? 0 : intValue;
+        });
+    } else {
+      // If no port codes are selected, show all container size integer values
+      return this.deficitSizes.map(containerSize => {
+        const intValue = parseInt(containerSize.split(':')[1].trim(), 10);
+        return isNaN(intValue) ? 0 : intValue;
+      });
+    }
+  }
+  getDeficitValueForPortCode(portCode: string): string {
+    const matchedDeficitValue = this.Totaldeficit[portCode];
+    return matchedDeficitValue ? matchedDeficitValue : '';
+  }
   
   @Input() DeficitlusContainerSizesByPort!: number[];
   filteredInventoryList : Inventory[] = [];
@@ -129,10 +168,10 @@ pickup_charges:any;
   console.log("in form d",this.deficit);
 
   console.log("in form dfddfd",this.deficitPercentage);
-  console.log("in form ct passed",this.containerTypes);
+  console.log("in form ct passed to check",this.containerTypes);
   console.log("in form cs passed",this.containerSizes);
   console.log("in form fggfg passed",this.portData);
-
+  console.log("in form surplus",this.Totalsurplus);
   console.log("in form yt",this.containerTypes);
 
     this.sessionService.getCompanyId().subscribe(
@@ -234,9 +273,59 @@ SurplusCount(portCode: string, container_types: any, container_size: any) {
   }
 }
 
+onDeficitChange() {
+  debugger
+if (this.deifcit_Type && this.deficit_Size) {
+  debugger
+  this.DeficitCount(this.portCode, this.deifcit_Type, this.deficit_Size);
+}
+}
 
+DeficitCount(portCode: string, deifcit_Type: any, deficit_Size: any) {
+  debugger
+  console.log("This method is called with:", portCode, deifcit_Type, deficit_Size);
+  let selecteddeficitPortId: number | null = null;
+  this.totalDeficit = 0; // Initialize totalSurplus to 0
+  
+  // Find the selectedPortId based on portCode
+  for (const port of this.port_list) {
+    if (port.port_code === portCode) {
+      selecteddeficitPortId = port.port_id;
+      break;
+    }
+  }
+  
+  if (selecteddeficitPortId !== null) {
+    console.log("Selected Port ID:", selecteddeficitPortId);
 
+    // Step 1: Filter items with matching port_id
+    const matchingPortdeficitItems = this.inventory_list_by_companyId.filter(item => item.port_id === selecteddeficitPortId);
 
+    // Step 2: Filter items with matching container_type
+    const matchingdeficitTypeItems = matchingPortdeficitItems.filter(item => item.container_type === deifcit_Type);
+
+    // Step 3: Filter items with matching container_size and calculate total surplus
+    matchingdeficitTypeItems
+    .filter(item => {
+      // Parse the selected container_size to an integer
+      const selecteddeficitSize = deficit_Size !== null ? parseInt(deficit_Size, 10) : null;
+      // Convert the item's container_size to a number
+      const itemSize = typeof item.container_size === 'number' ? item.container_size : parseInt(item.container_size, 10);
+      // Check if the item's container_size matches the selectedSize
+      return selecteddeficitSize === null || itemSize === selecteddeficitSize;
+    })
+    .forEach(item => {
+      this.totalDeficit += item.deficit; // Add the item's surplus to the total
+    });
+
+    // Now, totalSurplus contains the sum of surplus values for matching items
+    console.log("Total Surplus Value for Matching Items:", this.totalDeficit);
+
+    // You can use or display the totalSurplus value as needed
+  } else {
+    console.log("Invalid portCode. No matching port_id found.");
+  }
+}
 
 ondeficitDropdownChange() {
   
