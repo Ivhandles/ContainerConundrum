@@ -175,7 +175,7 @@
     
     <div class="col-span-2 text-xs">Container Type</div>
     <div class="text-right">
-      <select class="custom-select" [(ngModel)]="container_types">
+      <select class="custom-select" [(ngModel)]="container_types"(ngModelChange)="onSelectionChange()">
         <option selected>Select the Type</option>
         <option *ngFor="let containerType of filteredContainerTypes" [value]="containerType">{{ containerType }}</option>
       </select>

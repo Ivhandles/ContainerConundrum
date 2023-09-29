@@ -417,7 +417,7 @@ viewSurplus() {
       
         componentRef.instance.containerTypes = portCodeContainerTypes;
         componentRef.instance.containerSizes = portCodeContainerSizes; // Use containerSizes
-        componentRef.instance.Totaldeficit = portCodeTotalSurplusValues;
+        componentRef.instance.Totalsurplus = portCodeTotalSurplusValues;
 
 
         componentRef.instance.portCode = port.portCode;

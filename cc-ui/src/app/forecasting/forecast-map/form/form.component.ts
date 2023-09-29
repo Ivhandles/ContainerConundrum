@@ -109,6 +109,7 @@ pickup_charges:any;
     }
   }
   getSurplusValueForPortCode(portCode: string): string {
+    debugger
     const matchedSurplusValue = this.Totalsurplus[portCode];
     return matchedSurplusValue ? matchedSurplusValue : '';
   }
