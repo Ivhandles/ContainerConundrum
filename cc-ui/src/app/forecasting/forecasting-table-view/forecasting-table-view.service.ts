@@ -29,7 +29,7 @@ export interface Port {
 
   }
     getAllPorts(): Observable<any> {
-
+debugger
       const url = this.apiService.getFullUrl(`GetAllPorts`);
       return this.http.get(url);
     }

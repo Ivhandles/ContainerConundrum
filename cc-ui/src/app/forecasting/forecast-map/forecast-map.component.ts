@@ -179,7 +179,8 @@ debugger
 
   
   });
-}
+ }
+
 
 
 
@@ -284,120 +285,10 @@ debugger
     }
   }
   
-  
 
 
  
-  viewSurplus() {
-    debugger;
-    this.markers = [];
-    this.isSurplusAreaSelected = true; // Set the Surplus Area selected flag to true
-  
-
-    this.forecastService.getSurplus(this.companyId).subscribe(data => {
-      this.portData = data;
-      console.log("after view surplus", this.portData);
-      if (this.portData && this.portData.length > 0) {
-        this.map = new google.maps.Map(this.mapElement.nativeElement, {
-          center: { lat: +this.portData[0].latitude, lng: +this.portData[0].longitude },
-          zoom: 3,
-          mapId: '2b03aff8b2fb72a3'
-        });
-      } else {
-        this.noPorts = true;
-      }
-  
-
-      // Initialize arrays to store portCode-containerType and portCode-containerSize pairs
-      const portCodeContainerTypes: string[] = [];
-      const portCodeContainerSizes: string[] = [];
-  
-      // Extract and store portCode-containerType and portCode-containerSize pairs
-
-      // Initialize the object for storing container types by port code
-      this.containerTypesByPort = {};
-  
-
-      for (const port of this.portData) {
-        if (port.surplus > port.deficit) {
-          // Extract and concatenate the container types from this port
-          const containerTypes = port.containertype.split(',').map((type: string) => type.trim());
-
-  
-          // Loop through containerTypes and create the desired format
-          for (const containerType of containerTypes) {
-            const portCodeContainerType = `${port.portCode}: ${containerType}`;
-            portCodeContainerTypes.push(portCodeContainerType);
-          }
-  
-          // Ensure containersize is a valid integer
-          if (Number.isInteger(port.containersize)) {
-            const portCodeContainerSize = `${port.portCode}: ${port.containersize}`;
-            portCodeContainerSizes.push(portCodeContainerSize);
-          }
-
-          
-          // Store the container types in the object using the port code as the key
-          this.containerTypesByPort[port.portCode] = containerTypes;
-
-          let iconUrl = "../assets/images/green-dot.png";
-          const mapMarker = new google.maps.Marker({
-            position: { lat: port.latitude, lng: port.longitude },
-            map: this.map,
-            icon: {
-              url: iconUrl,
-              scaledSize: new google.maps.Size(10, 10),
-              anchor: new google.maps.Point(10 / 2, 10 / 2)
-            },
-            title: "" + port.latitude + ", " + port.longitude,
-          });
-          const infoWindow = new google.maps.InfoWindow();
-          infoWindow.setPosition({ lat: port.latitude, lng: port.longitude })
-  
-          const factory = this.resolver.resolveComponentFactory(FormComponent);
-          const componentRef = factory.create(this.viewContainerRef.injector);
-
-          componentRef.instance.portData = this.portData; 
-          console.log("dfdf",this.portData);
-          componentRef.instance.portData = port.portData;
-          componentRef.instance.portCode = port.portCode;
-          componentRef.instance.portId = port.portId;
-          componentRef.instance.surplus = port.surplus;
-        
-          componentRef.instance.containerTypes = portCodeContainerTypes;
-          componentRef.instance.containerSizes = portCodeContainerSizes; // Use containerSizes
-  
-
-  
-          componentRef.instance.portCode = port.portCode;
-          componentRef.instance.portId = port.portId;
-          componentRef.instance.surplus = port.surplus;
-          console.log("in forecast", port.surplus);
-          componentRef.instance.containerTypes = containerTypes; // Pass the array of container types
-          console.log("in forecast ct",containerTypes);
-          componentRef.instance.containersize = port.containersize;
-
-          componentRef.instance.isSurplusAreaSelected = this.isSurplusAreaSelected;
-  
-          this.appRef.attachView(componentRef.hostView);
-          infoWindow.setContent(componentRef.location.nativeElement);
-  
-          mapMarker.addListener('click', () => {
-            debugger;
-            infoWindow.open(this.map, mapMarker);
-          });
-          this.markers.push(mapMarker);
-        }
-      }
-
-  
-      // Now, portCodeContainerTypes contains the portCode-containerType pairs
-      console.log('PortCode-ContainerTypes:', portCodeContainerTypes);
-  
-      // Now, portCodeContainerSizes contains the portCode-containerSize pairs
-      console.log('PortCode-ContainerSizes:', portCodeContainerSizes);
-    });
-  }
+ 
   
   
   
@@ -442,6 +333,125 @@ debugger
   XLSX.utils.book_append_sheet(workbook, worksheet, worksheetName);
   XLSX.writeFile(workbook, excelFileName);
 }
+viewSurplus() {
+  debugger;
+  this.markers = [];
+  this.isSurplusAreaSelected = true; // Set the Surplus Area selected flag to true
+  const totalSurplusByPortCode: { [key: string]: number } = {};
+  this.forecastService.getSurplus(this.companyId).subscribe(data => {
+    this.portData = data;
+    console.log("after view surplus", this.portData);
+    if (this.portData && this.portData.length > 0) {
+      this.map = new google.maps.Map(this.mapElement.nativeElement, {
+        center: { lat: +this.portData[0].latitude, lng: +this.portData[0].longitude },
+        zoom: 3,
+        mapId: '2b03aff8b2fb72a3'
+      });
+    } else {
+      this.noPorts = true;
+    }
+
+
+    // Initialize arrays to store portCode-containerType and portCode-containerSize pairs
+    const portCodeContainerTypes: string[] = [];
+    const portCodeContainerSizes: string[] = [];
+    const portCodeTotalSurplusValues: { [key: string]: number } = {};
+   
+
+
+    for (const port of this.portData) {
+      if (port.surplus > port.deficit) {
+        // Extract and concatenate the container types from this port
+        const containerTypes = port.containertype.split(',').map((type: string) => type.trim());
+
+
+        // Loop through containerTypes and create the desired format
+        for (const containerType of containerTypes) {
+          const portCodeContainerType = `${port.portCode}: ${containerType}`;
+          portCodeContainerTypes.push(portCodeContainerType);
+        }
+
+        // Ensure containersize is a valid integer
+        if (Number.isInteger(port.containersize)) {
+          const portCodeContainerSize = `${port.portCode}: ${port.containersize}`;
+          portCodeContainerSizes.push(portCodeContainerSize);
+        }
+
+     
+        const surplusValue = parseInt(port.surplus, 10);
+
+        // Check if the port code already exists in the object
+        if (portCodeTotalSurplusValues[port.portCode]) {
+          // If it exists, add the surplus value to the existing total
+          portCodeTotalSurplusValues[port.portCode] += surplusValue;
+        } else {
+          // If it doesn't exist, initialize it with the surplus value
+          portCodeTotalSurplusValues[port.portCode] = surplusValue;
+        }
+
+       
+
+        let iconUrl = "../assets/images/green-dot.png";
+        const mapMarker = new google.maps.Marker({
+          position: { lat: port.latitude, lng: port.longitude },
+          map: this.map,
+          icon: {
+            url: iconUrl,
+            scaledSize: new google.maps.Size(10, 10),
+            anchor: new google.maps.Point(10 / 2, 10 / 2)
+          },
+          title: "" + port.latitude + ", " + port.longitude,
+        });
+        const infoWindow = new google.maps.InfoWindow();
+        infoWindow.setPosition({ lat: port.latitude, lng: port.longitude })
+
+        const factory = this.resolver.resolveComponentFactory(FormComponent);
+        const componentRef = factory.create(this.viewContainerRef.injector);
+
+        componentRef.instance.portData = this.portData; 
+        console.log("dfdf",this.portData);
+        componentRef.instance.portData = port.portData;
+        componentRef.instance.portCode = port.portCode;
+        componentRef.instance.portId = port.portId;
+        componentRef.instance.surplus = port.surplus;
+      
+        componentRef.instance.containerTypes = portCodeContainerTypes;
+        componentRef.instance.containerSizes = portCodeContainerSizes; // Use containerSizes
+        componentRef.instance.Totaldeficit = portCodeTotalSurplusValues;
+
+
+        componentRef.instance.portCode = port.portCode;
+        componentRef.instance.portId = port.portId;
+        
+        console.log("in forecast", port.surplus);
+        
+        console.log("in forecast ct",containerTypes);
+       
+
+        componentRef.instance.isSurplusAreaSelected = this.isSurplusAreaSelected;
+
+        this.appRef.attachView(componentRef.hostView);
+        infoWindow.setContent(componentRef.location.nativeElement);
+
+        mapMarker.addListener('click', () => {
+          debugger;
+          infoWindow.open(this.map, mapMarker);
+        });
+        this.markers.push(mapMarker);
+      }
+    }
+
+
+
+    // Now, portCodeContainerTypes contains the portCode-containerType pairs
+    console.log('PortCode-ContainerTypes:', portCodeContainerTypes);
+
+    // Now, portCodeContainerSizes contains the portCode-containerSize pairs
+    console.log('PortCode-ContainerSizes:', portCodeContainerSizes);
+    console.log('PortCode-ContainerSurplus:', portCodeTotalSurplusValues);
+   
+  });
+}
   viewDeficit(){
     debugger
     this.markers = []
@@ -462,9 +472,35 @@ debugger
       } else {
         this.noPorts = true;
       }
-
+      const DeficitContainerTypes: string[] = [];
+      const DeficitContainerSizes: string[] = [];
+      const TotalDeficitValues: { [key: string]: number } = {};
       for (const port of this.portData) {
+        
         if (port.deficit> port.surplus){
+          const containerTypes = port.containertype.split(',').map((type: string) => type.trim());
+
+
+          // Loop through containerTypes and create the desired format
+          for (const containerType of containerTypes) {
+            const DeficitContainerType = `${port.portCode}: ${containerType}`;
+            DeficitContainerTypes.push(DeficitContainerType);
+          }
+          if (Number.isInteger(port.containersize)) {
+            const DeficitContainerSize = `${port.portCode}: ${port.containersize}`;
+            DeficitContainerSizes.push(DeficitContainerSize);
+          }
+          const DeficitValue = parseInt(port.deficit, 10);
+
+          // Check if the port code already exists in the object
+          if (TotalDeficitValues[port.portCode]) {
+            // If it exists, add the surplus value to the existing total
+            TotalDeficitValues[port.portCode] += DeficitValue;
+          } else {
+            // If it doesn't exist, initialize it with the surplus value
+            TotalDeficitValues[port.portCode] = DeficitValue;
+          }
+  
         let iconUrl = "../assets/images/red-dot.png";
         const mapMarker = new google.maps.Marker({
           position: { lat: port.latitude, lng: port.longitude },
@@ -485,6 +521,9 @@ debugger
         componentRef.instance.portId = port.portId;
         componentRef.instance.surplus = port.surplus;
         componentRef.instance.isDeficitAreaSelected = this.isDeficitAreaSelected;
+        componentRef.instance.deficitTypes = DeficitContainerTypes;
+        componentRef.instance.deficitSizes = DeficitContainerSizes; // Use containerSizes
+        componentRef.instance.Totaldeficit = TotalDeficitValues;
         componentRef.instance.deficit = port.deficit;
         componentRef.instance.containertype=port.containertype;
         componentRef.instance.containersize=port.containersize
@@ -497,6 +536,11 @@ debugger
         this.markers.push(mapMarker);
       }
       }
+      console.log('PortCode-ContainerTypes:', DeficitContainerTypes);
+
+      // Now, portCodeContainerSizes contains the portCode-containerSize pairs
+      console.log('PortCode-ContainerSizes:', DeficitContainerSizes);
+      console.log('PortCode-ContainerSurplus:', TotalDeficitValues);
     })
 }
 
