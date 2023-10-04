@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ForecastingTableService } from '../../forecasting-table-view/forecasting-table-view.service';
 import { SessionService } from 'src/app/session.service';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { PostAdComponent } from 'src/app/my-advertisement/post-ad/post-ad.component';
 import { MatSnackBar, MatSnackBarConfig, MatSnackBarRef } from '@angular/material/snack-bar';
 import { PostAdService } from 'src/app/my-advertisement/post-ad/post-ad.service';
+import { SharedServiceService } from 'src/app/shared-service.service';
 
 @Component({
   selector: 'app-form',
@@ -81,6 +82,8 @@ pickup_charges:any;
   @Input() DeficitContainerTypesByPort!: string[];
   @Input() DeficitlusContainerSizesByPort!: number[];
   ssurplusCount: any; 
+  @Output() optimizedViewRequested = new EventEmitter<void>();
+  @Output() dataToChild = new EventEmitter<any>();
   get filteredContainerTypes(): string[] {
     if (this.portCode) {
       // Filter and remove the port code prefix from container types based on the selected port code
@@ -200,11 +203,11 @@ pickup_charges:any;
   constructor(
     private forecastingtableService: ForecastingTableService,
     private sessionService: SessionService,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
+
     private dialog:MatDialog,
-    private snackBar: MatSnackBar,
-    private postAdService: PostAdService
+    
+    
+    private sharedservice: SharedServiceService
   ) {
     
   }
@@ -382,6 +385,18 @@ ondeficitDropdownChange() {
     this.updateDeficitCount(this.portCode, this.deifcitcontainerType, this.deficitcontainerSize);
   }
 }
+// Define your method to handle the button click
+onOptimizedViewButtonClick() {
+  if (this.isOptimizedViewEnabled()) {
+    const port_code = this.portCode; // Replace with the actual port code you want to send
+    const container_type = this.deifcitcontainerType; // Corrected variable name
+    const container_size = this.deficitcontainerSize;
+    this.sharedservice.setData(port_code, container_type,container_size); // Call the setData method with the port_code and container_type values
+  }
+}
+
+
+
 isOptimizedViewEnabled(): boolean {
   const surplusTypeValid = this.surpluscontainerType !== 'Select the Type';
   const surplusSizeValid = typeof this.surpluscontainerSize === 'string' && this.surpluscontainerSize !== 'Select the Size';

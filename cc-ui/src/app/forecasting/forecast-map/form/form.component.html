@@ -132,8 +132,16 @@
           class="bg-white text-xs align-middle p-1 px-3 border text-black rounded-xl hover:text-CCblue">
           <span class="ml-1">Post Ad</span>
         </button>&nbsp;
-          <button class="bg-blue-600 text-xs align-middle p-1 px-4 mx-auto text-white rounded-xl hover:bg-CCblue"
-          routerLink="/my-ad"  [ngClass]="{'disabled-button': !isOptimizedViewEnabled()}">Optimized View</button>
+      
+      
+        <button
+        class="bg-blue-600 text-xs align-middle p-1 px-4 mx-auto text-white rounded-xl hover:bg-CCblue"
+        routerLink="/optimized-view" (click)="onOptimizedViewButtonClick()"
+        [ngClass]="{'disabled-button': !isOptimizedViewEnabled()}"
+      >
+        Optimized View
+      </button>
+      
   </div>
 </div>
 <!--only for surplus area-->
@@ -214,7 +222,7 @@
         <span class="ml-1">Post Ad</span>
       </button>&nbsp;
         <button class="bg-blue-600 text-xs align-middle p-1 px-4 mx-auto text-white rounded-xl hover:bg-CCblue"
-        routerLink="/my-ad"  [ngClass]="{'disabled-button': !isOptimizedViewEnabled()}">Optimized View</button>
+        routerLink="/optimized-view"  [ngClass]="{'disabled-button': !isOptimizedViewEnabled()}">Optimized View</button>
 </div>
 </div>
 </div>
@@ -293,6 +301,6 @@
         <span class="ml-1">Post Ad</span>
       </button>&nbsp;
         <button class="bg-blue-600 text-xs align-middle p-1 px-4 mx-auto text-white rounded-xl hover:bg-CCblue"
-        routerLink="/my-ad"  [ngClass]="{'disabled-button': !isOptimizedViewEnabled()}">Optimized View</button>
+        routerLink="/optimized-view"  [ngClass]="{'disabled-button': !isOptimizedViewEnabled()}">Optimized View</button>
 </div>
 </div>
