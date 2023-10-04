@@ -28,34 +28,11 @@ namespace CC_api.Controllers
     [HttpGet("GetAllServicesByCompanyId")]
     public async Task<IActionResult> GetAllServicesByCompanyId(int companyid)
     {
-      var alumnus = await servicesBusiness.GetAllServicesByCompanyId(companyid);
-      return Ok(alumnus);
+      var services = await servicesBusiness.GetAllServicesByCompanyId(companyid);
+      return Ok(services);
     }
 
-    //[HttpGet("GetServicesByName")]
-    //public async Task<IActionResult> GetByServiceName(string servicename)
-    //{
-    //  var service = await servicesBusiness.GetByServiceName(servicename);
 
-    //  if (service != null)
-    //  {
-    //    var result = new
-    //    {
-    //      ServiceName = service.service_name,
-    //      Ports = service.PortSequences.Select(p => new
-    //      {
-    //        PortCode = p.port_code,
-    //        PortName = p.port_name
-    //      }).ToList()
-    //    };
-
-    //    return Ok(result);
-    //  }
-    //  else
-    //  {
-    //    return NotFound();
-    //  }
-    //}
     [HttpGet("GetPortSequencesByServiceName")]
     public async Task<IActionResult> GetPortSequencesByServiceName(string serviceName)
     {
@@ -77,10 +54,11 @@ namespace CC_api.Controllers
                 ps.port_name,
                 ps.port_seq_id,
                 ps.seq_no,
+                ps.service_id,
                 port.latitude,
                 port.longitude,
-                port.company_id,
                 port.country
+
               });
             }
           }

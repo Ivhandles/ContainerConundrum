@@ -16,11 +16,12 @@ namespace CC_api.Business
     {
       return await serviceRepository.GetAllServices();
     }
-    public async Task<CarrierService> GetAllServicesByCompanyId(int companyid)
+    public async Task<List<CarrierService>> GetAllServicesByCompanyId(int companyid)
     {
-      var alumnus = await serviceRepository.GetAllServicesByCompanyId(companyid);
-      return alumnus;
+      var services = await serviceRepository.GetAllServicesByCompanyId(companyid);
+      return services;
     }
+
     public async Task<List<PortSequence>> GetPortSequencesByServiceName(string serviceName)
     {
       var portSequences = await serviceRepository.GetPortSequencesByServiceName(serviceName);

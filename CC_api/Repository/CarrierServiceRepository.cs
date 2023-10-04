@@ -14,20 +14,11 @@ namespace CC_api.Repository
     {
       return dbContext.carrier_service.ToList();
     }
-    public async Task<CarrierService> GetAllServicesByCompanyId(int companyid)
+    public async Task<List<CarrierService>> GetAllServicesByCompanyId(int companyid)
     {
-      var service = dbContext.carrier_service.FirstOrDefault(e => e.company_id == companyid);
-      return service;
+      var services = dbContext.carrier_service.Where(e => e.company_id == companyid).ToList();
+      return services;
     }
-
-    //public async Task<CarrierService> GetByServiceName(string servicename)
-    //{
-    //  var service = await dbContext.carrier_service
-    //      .Include(c => c.PortSequences) 
-    //      .FirstOrDefaultAsync(e => e.service_name == servicename);
-
-    //  return service;
-    //}
 
     public async Task<List<PortSequence>> GetPortSequencesByServiceName(string serviceName)
     {
