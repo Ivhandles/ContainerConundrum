@@ -2,8 +2,10 @@ import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '
 import { SessionService } from '../session.service';
 import { ForecastingTableService } from '../forecasting/forecasting-table-view/forecasting-table-view.service';
 import * as XLSX from 'xlsx';
-import { ActivatedRoute, Router } from '@angular/router';
 import { SharedServiceService } from '../shared-service.service';
+import { distinctUntilChanged, filter, map, mergeMap, switchMap, takeUntil } from 'rxjs/operators';
+import { Subject, combineLatest, forkJoin, of } from 'rxjs';
+import { CarrierServiceService } from '../carrier-service/carrier-service.service';
 
 @Component({
   selector: 'app-optimized-view',
@@ -11,132 +13,290 @@ import { SharedServiceService } from '../shared-service.service';
   styleUrls: ['./optimized-view.component.css']
 })
 export class OptimizedViewComponent implements OnInit, AfterViewInit {
-
   @ViewChild('mapElement', { static: true }) mapElement: ElementRef | undefined;
   map: google.maps.Map | undefined;
-  port_list: any;
+  port_list: any[] = [];
   companyId!: number;
   Einv: Inventory[] = [];
-  port_id: any;
-  Port_code: any;
-  Container_type: any;
-  Container_size: any;
+  receivedportCode: any;
+  receivedcontainerType: any;
+  receivedcontainerSize: any;
   inventory_list_by_companyId: Inventory[] = [];
-  filteredInventoryList : Inventory[] = [];
-portCode:any;
+  filteredInventoryList: Inventory[] = [];
+  portCodeReceived = false;
+  containerTypeReceived = false;
+  containerSizeReceived = false;
+  service_name?: any;
+  public company_id?: number;
+  service_id?:number;
+  services: any[] = [];
+  router: any;
+  public carrierServices: any[] = [];
+
+  private unsubscribe$: Subject<void> = new Subject<void>();
+
   constructor(
     private sessionService: SessionService,
     private forecastingtableService: ForecastingTableService,
-    private sharedService: SharedServiceService
+    private sharedService: SharedServiceService,
+    private carrierservice:CarrierServiceService
   ) {}
 
-  ngAfterViewInit() {
-    this.initMap();
-  }
+ 
 
   ngOnInit(): void {
-    this.sharedService.getData().subscribe((data) => {
-      this.Port_code = data.port_code;
-      this.Container_type = data.container_type;
-      this.Container_size = data.container_size;
-      console.log('Received data from service:', data.port_code, data.container_type, data.container_size);
-      const matchingPort = this.port_list.find((port: { port_code: string; }) => port.port_code === this.Port_code);
-  
-      if (matchingPort) {
-        this.port_id = matchingPort.port_id;
-        console.log('Matching port name:', this.port_id);
-        const containerSizeAsInt = parseInt(this.Container_size, 10);
-        this.filterAndStoreSurplusInventory(this.port_id, this.Container_type, containerSizeAsInt);
-      } else {
-        console.log('No matching port found for Port_code:', this.Port_code);
+    
+   
+    this.loadInitialData();
+   
+    const serviceNames: string[] = []; 
+
+    this.carrierservice.getCarrierServicesbyCId(this.companyId).subscribe(
+      (data: any[]) => { 
+        
+        for (let i = 0; i < data.length; i++) {
+          const service = data[i];
+          console.log("Carrier service", service);
+          this.company_id = service.company_id;
+          serviceNames.push(service.service_name);
+          console.log("in services",serviceNames);
+          this.service_id = service.service_id;
+          this.services = data;
+        }
+      },
+      error => {
+        console.warn("oninit error", error);
+      }
+    );
+    combineLatest([
+      this.sharedService.selected_port,
+      this.sharedService.selectedContainerType$,
+      this.sharedService.selectedContainerSize$,
+    ])
+    .pipe(
+      filter(([portCode, containerType, containerSize]) => 
+        portCode !== undefined && containerType !== undefined && containerSize !== undefined
+      )
+    )
+    .subscribe(([portCode, containerType, containerSize]) => {
+      // Assign the values
+      debugger
+      this.receivedportCode = portCode;
+      this.receivedcontainerType = containerType;
+      this.receivedcontainerSize = containerSize;
+    
+      this.portCodeReceived = true;
+      this.containerTypeReceived = true;
+      this.containerSizeReceived = true;
+    
+      // Check if all values are received before calling filterData
+      if (
+        this.portCodeReceived &&
+        this.containerTypeReceived &&
+        this.containerSizeReceived
+      ) {
+        this.filterData(this.receivedportCode, this.receivedcontainerType, this.receivedcontainerSize);
       }
     });
-    this.sessionService.getCompanyId().subscribe(
-      (companyId: number) => {
-        this.companyId = companyId;
+
+    
+   
+  }
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
+  private loadInitialData(): void {
+    this.sessionService.getCompanyId()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (companyId: number) => {
+          this.companyId = companyId;
+          this.loadPortList(); // Load port list after getting company ID
+        },
+        (error: any) => {
+          console.error('Error retrieving company ID:', error);
+        }
+      );
+  }
+
+  private loadPortList(): void {
+    this.forecastingtableService.getAllPorts().subscribe(
+      (data: any) => {
+        this.port_list = data;
+        console.log("PortData", this.port_list);
+        this.loadInventoryData(); // Load inventory data after getting port list
+      },
+      (error: any) => {
+        console.error('Error retrieving port list:', error);
+      }
+    );
+  }
+
+  private loadInventoryData(): void {
+    this.forecastingtableService.getInventoryByIdCID(this.companyId).subscribe(
+      (data: Inventory[]) => {
+        this.inventory_list_by_companyId = data;
+        console.log('Inventory list by company id is fetched:', this.inventory_list_by_companyId);
+        this.filteredInventoryList = this.inventory_list_by_companyId;
+
+        // Call filterData here after loading all data
+        this.filterData(this.receivedportCode, this.receivedcontainerType, this.receivedcontainerSize);
+      },
+      (error: any) => {
+        console.log('Inventory loading error:', error);
+      }
+    );
+  }
+  
+  filterData(receivedportCode: string, receivedcontainerType: string, receivedcontainerSize: string): void {
+    
+    console.log('Searching for Port Code:', receivedportCode);
+    
+    this.forecastingtableService.getAllPorts().subscribe(
+      (data: any) => {
+        this.port_list = data;
+        console.log("PortData",this.port_list)
       },
       (error: any) => {
         console.error('Error retrieving company ID:', error);
       }
     );
+    // Use Array.find() to find the matching port_id
+    const matchedPort = this.port_list.find((port: any) => port.port_code === receivedportCode);
   
-    
-    this.forecastingtableService.getInventoryByIdCID(this.companyId).subscribe(
-      (data: Inventory[]) => {
-        this.inventory_list_by_companyId = data;
-        console.log('inv list by company id is fetched:', this.inventory_list_by_companyId);
-        
-        this.filteredInventoryList = this.inventory_list_by_companyId;
-      },
-      (error: any) => {
-        console.log('inv loading error:', error);
-      }
-    );
-    this.forecastingtableService.getAllPorts().subscribe(
-      (data: any) => {
-        this.port_list = data;
-        console.log("Port list fetched: ", this.port_list);
+    if (matchedPort) {
+        const matchedPortId = matchedPort.port_id;
+        console.log('Matched Port ID:', matchedPortId);
+        // Filter the inventory data based on the matchedPortId
+        this.forecastingtableService.getInventoryByIdCID(this.companyId).subscribe(
+          (data: Inventory[]) => {
+            this.inventory_list_by_companyId = data;
+            console.log('inv list by company id is fetched:', this.inventory_list_by_companyId);
+            
+            this.filteredInventoryList = this.inventory_list_by_companyId;
+          },
+          (error: any) => {
+            console.log('inv loading error:', error);
+          }
+        );
+        const filteredport = this.inventory_list_by_companyId.filter((inventory: Inventory) => {
+            return inventory.port_id != matchedPortId;
+        });
 
-        // Check for the matching port here
-      }
-    );
+        console.log('Filtered Inventory:', filteredport);
+        const filteredInventoryByContainerType = filteredport.filter((inventory: Inventory) => {
+            return inventory.container_type === receivedcontainerType;
+        });
 
-   
-  }
-  filterAndStoreSurplusInventory(port_id: any, Container_type: any, containerSizeAsInt: number) {
-    debugger;
-    console.log("inside method", port_id);
-    console.log("inside method", Container_type);
-    console.log("inside method", containerSizeAsInt);
-  
-    // Fetch the inventory data
-    this.forecastingtableService.getInventoryByIdCID(this.companyId).subscribe(
-      (data: Inventory[]) => {
-        this.inventory_list_by_companyId = data;
-        console.log('inv list by company id is fetched:', this.inventory_list_by_companyId);
-  
-        // Step 1: Filter and store inventory items from non-matching ports
-        const nonMatchingInventory: Inventory[] = this.inventory_list_by_companyId.filter((item: Inventory) => {
-          return item.port_id !== port_id; // Exclude matching port
+        console.log('Filtered Inventory by Container Type:', filteredInventoryByContainerType);
+        const containerSizeInt = parseInt(receivedcontainerSize, 10);
+        const filteredInventoryByContainerSize = filteredInventoryByContainerType.filter((inventory: Inventory) => {
+            return parseInt(inventory.container_size, 10) === containerSizeInt;
         });
-  
-        console.log('Non-Matching Inventory:', nonMatchingInventory);
-  
-        // Step 2: Filter and store inventory items with similar container types
-        const matchingContainerTypeInventory: Inventory[] = nonMatchingInventory.filter((item: Inventory) => {
-          return item.container_type === Container_type; // Filter by container type
+
+        console.log('Filtered Inventory by Container Size:', filteredInventoryByContainerSize);
+
+        // Filter inventory data where surplus is greater than deficit
+        const filteredInventoryWithSurplus = filteredInventoryByContainerSize.filter((inventory: Inventory) => {
+            const surplus = inventory.surplus;
+            const deficit = inventory.deficit;
+            return surplus > deficit; 
         });
-  
-        console.log('Matching Container Type Inventory:', matchingContainerTypeInventory);
-  
-        // Step 3: Filter and store inventory items with matching container sizes
-        const finalInventory: Inventory[] = matchingContainerTypeInventory.filter((item: Inventory) => {
-          return item.container_size === containerSizeAsInt; // Filter by container size
-        });
-  
-        console.log('Final Inventory:', finalInventory);
+
+        console.log('Filtered Inventory with Surplus > Deficit:', filteredInventoryWithSurplus);
+
+    } else {
+        console.log('No matching port found.');
+    }
+    this.filterservices(receivedportCode);
+}
+
+filterservices(portCode: string) {
+  console.log("Port code received inside filterservices", portCode);
+  const allData: any[] = [];
+  const matchingGroupedData: { [key: string]: any[] }[] = [];
+
+  // Fetch the initial service names
+  this.carrierservice.getCarrierServicesbyCId(this.companyId).pipe(
+      mergeMap((data: any[]) => {
+          // Create an array of observables for each service name
+          const observables = data.map(service => {
+              const serviceName = service.service_name;
+
+              // Fetch data for each service name and return the observable
+              return this.carrierservice.getCarrierServicesbySName(serviceName).pipe(
+                  map((serviceData: any[]) => {
+                      // Combine the service name and its data into an object
+                      return { serviceName, serviceData };
+                  })
+              );
+          });
+
+          // Use forkJoin to combine the results of all observables into a single observable
+          return forkJoin(observables);
+      })
+  ).subscribe(
+      (results: { serviceName: string, serviceData: any[] }[]) => {
+          results.forEach(result => {
+              allData.push(...result.serviceData);
+          });
+
+          // Group data by service_id
+          const groupedData = allData.reduce((acc, item) => {
+              const serviceId = item.service_id;
+              if (!acc[serviceId]) {
+                  acc[serviceId] = [];
+              }
+              acc[serviceId].push(item);
+              return acc;
+          }, {});
+
+          // The 'groupedData' object now contains arrays of data grouped by service_id
+          console.log("Grouped Data:", groupedData);
+
+          // Check if the 'portCode' matches in any of the grouped data and store matching groups
+          for (const key in groupedData) {
+              if (groupedData.hasOwnProperty(key)) {
+                  const group = groupedData[key];
+                  if (group.some((item: { port_code: string; }) => item.port_code === portCode)) {
+                      matchingGroupedData.push({ [key]: group });
+                  }
+              }
+          }
+
+          if (matchingGroupedData.length > 0) {
+              // The 'matchingGroupedData' variable contains the grouped data with a matching 'portCode'
+              console.log("Matching Grouped Data:", matchingGroupedData);
+          } else {
+              console.log("No matching grouped data found for the port code.");
+          }
       },
-      (error: any) => {
-        console.log('inv loading error:', error);
+      error => {
+          console.warn("Error while fetching carrier services by service names", error);
       }
-    );
+  );
+}
+
+
+  ngAfterViewInit() {
+    this.initMap();
   }
   
-  
-  
+
+ 
   
 
   initMap() {
     if (this.mapElement) {
       const mapElement = this.mapElement.nativeElement;
-      // Set the initial map options (customize as needed)
       const mapOptions: google.maps.MapOptions = {
         center: { lat: 37.7749, lng: -122.4194 },
         zoom: 10,
         mapId: '2b03aff8b2fb72a3'
       };
 
-      // Create a new Google Map instance and display it in the mapElement
       this.map = new google.maps.Map(mapElement, mapOptions);
     }
   }
@@ -144,32 +304,22 @@ portCode:any;
   onPortSelected(selectedPortName: string) {
     if (selectedPortName === 'Select Port') {
       window.location.reload();
-   
+
       if (this.map) {
-        this.map.setCenter({ lat: 0, lng: 0 }); // Set the center to your original coordinates
-        this.map.setZoom(3); // Set the original zoom level
+        this.map.setCenter({ lat: 0, lng: 0 });
+        this.map.setZoom(3);
       }
     } else {
-      // Find the selected port based on port_name in your port_list
       const selectedPort = this.port_list.find((port: { port_name: string; }) => port.port_name === selectedPortName);
 
       if (selectedPort && this.map) {
-        // Get the latitude and longitude of the selected port
         const latitude = +selectedPort.latitude;
         const longitude = +selectedPort.longitude;
 
-        // Set the map's center to the selected port's location
         this.map.setCenter({ lat: latitude, lng: longitude });
-
-        // You can also adjust the zoom level as needed
-        this.map.setZoom(10); // Set the desired zoom level
+        this.map.setZoom(10);
       }
     }
-  }
-
-  getPortName(portId: number): string {
-    const port = this.port_list.find((p: { port_id: number, port_name: string }) => p.port_id === portId);
-    return port ? port.port_name : '';
   }
 
   onExport() {
@@ -181,15 +331,19 @@ portCode:any;
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.aoa_to_sheet([header, ...data]);
     const columnWidths = [
-      { wch: 15 }, // Port Name width: 15
-      { wch: 15 }, // Container Type width: 15
+      { wch: 15 },
+      { wch: 15 },
     ];
 
-    // Apply column widths to worksheet
     worksheet['!cols'] = columnWidths;
 
     XLSX.utils.book_append_sheet(workbook, worksheet, worksheetName);
     XLSX.writeFile(workbook, excelFileName);
+  }
+
+  getPortName(portId: number): string {
+    const port = this.port_list.find((p: { port_id: number, port_name: string }) => p.port_id === portId);
+    return port ? port.port_name : '';
   }
 
   onExportClick(): void {
@@ -199,10 +353,9 @@ portCode:any;
           const portName = this.getPortName(item.port_id);
           return { ...item, port_name: portName };
         });
-        console.log("This is Einv with port names:", this.Einv);
         this.onExport();
       },
-      (error: any) => console.log(error)
+      (error: any) => console.error(error)
     );
   }
 }
@@ -211,9 +364,8 @@ interface Inventory {
   port_name: string;
   port_id: number;
   container_type: string;
-  container_size: number;
+  container_size: any;
   available: number;
   surplus: number;
   deficit: number;
-  // Add other properties if necessary
 }
