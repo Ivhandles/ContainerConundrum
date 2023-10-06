@@ -32,7 +32,7 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
   services: any[] = [];
   router: any;
   public carrierServices: any[] = [];
-
+  matchingData: any[] = [];
   private unsubscribe$: Subject<void> = new Subject<void>();
 
   constructor(
@@ -49,25 +49,7 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
    
     this.loadInitialData();
    
-    const serviceNames: string[] = []; 
-
-    this.carrierservice.getCarrierServicesbyCId(this.companyId).subscribe(
-      (data: any[]) => { 
-        
-        for (let i = 0; i < data.length; i++) {
-          const service = data[i];
-          console.log("Carrier service", service);
-          this.company_id = service.company_id;
-          serviceNames.push(service.service_name);
-          console.log("in services",serviceNames);
-          this.service_id = service.service_id;
-          this.services = data;
-        }
-      },
-      error => {
-        console.warn("oninit error", error);
-      }
-    );
+   
     combineLatest([
       this.sharedService.selected_port,
       this.sharedService.selectedContainerType$,
@@ -210,74 +192,130 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
     } else {
         console.log('No matching port found.');
     }
-    this.filterservices(receivedportCode);
+    // this.filterservices(receivedportCode);
 }
 
-filterservices(portCode: string) {
-  console.log("Port code received inside filterservices", portCode);
-  const allData: any[] = [];
-  const matchingGroupedData: { [key: string]: any[] }[] = [];
+// filterservices(portCode: string) {
+//   console.log("Port code received inside filterservices", portCode);
+//   const allData: any[] = [];
+//   const matchingGroupedData: { serviceId: string, group: any[] }[] = [];
 
-  // Fetch the initial service names
-  this.carrierservice.getCarrierServicesbyCId(this.companyId).pipe(
-      mergeMap((data: any[]) => {
-          // Create an array of observables for each service name
-          const observables = data.map(service => {
-              const serviceName = service.service_name;
+//   // Fetch the initial service names
+//   this.carrierservice.getCarrierServicesbyCId(this.companyId).pipe(
+//       mergeMap((data: any[]) => {
+//           // Create an array of observables for each service name
+//           const observables = data.map(service => {
+//               const serviceId = service.service_id;
+//               const serviceName = service.service_name;
+//               console.log("get service by cid", serviceName);
+//               // Fetch data for each service name and return the observable
+//               return this.carrierservice.getCarrierServicesbySName(serviceName).pipe(
+//                   map((serviceData: any[]) => {
+//                       // Combine the service ID, service name, and its data into an object
+//                       return { serviceId, serviceName, serviceData };
+//                   })
+//               );
+//           });
 
-              // Fetch data for each service name and return the observable
-              return this.carrierservice.getCarrierServicesbySName(serviceName).pipe(
-                  map((serviceData: any[]) => {
-                      // Combine the service name and its data into an object
-                      return { serviceName, serviceData };
-                  })
-              );
-          });
+//           // Use forkJoin to combine the results of all observables into a single observable
+//           return forkJoin(observables);
+//       })
+//   ).subscribe(
+//       (results: { serviceId: string, serviceName: string, serviceData: any[] }[]) => {
+//           results.forEach(result => {
 
-          // Use forkJoin to combine the results of all observables into a single observable
-          return forkJoin(observables);
-      })
-  ).subscribe(
-      (results: { serviceName: string, serviceData: any[] }[]) => {
-          results.forEach(result => {
-              allData.push(...result.serviceData);
-          });
+//               allData.push(...result.serviceData);
+//           });
 
-          // Group data by service_id
-          const groupedData = allData.reduce((acc, item) => {
-              const serviceId = item.service_id;
-              if (!acc[serviceId]) {
-                  acc[serviceId] = [];
-              }
-              acc[serviceId].push(item);
-              return acc;
-          }, {});
+//           // Group data by service_id
+//           const groupedData = allData.reduce((acc, item) => {
+//               const serviceId = item.service_id;
+//               if (!acc[serviceId]) {
+//                   acc[serviceId] = [];
+//               }
+//               acc[serviceId].push(item);
+//               return acc;
+//           }, {});
 
-          // The 'groupedData' object now contains arrays of data grouped by service_id
-          console.log("Grouped Data:", groupedData);
+//           // The 'groupedData' object now contains arrays of data grouped by service_id
+//           console.log("Grouped Data:", groupedData);
 
-          // Check if the 'portCode' matches in any of the grouped data and store matching groups
-          for (const key in groupedData) {
-              if (groupedData.hasOwnProperty(key)) {
-                  const group = groupedData[key];
-                  if (group.some((item: { port_code: string; }) => item.port_code === portCode)) {
-                      matchingGroupedData.push({ [key]: group });
-                  }
-              }
-          }
+//           // Check if the 'portCode' matches in any of the grouped data and store matching groups
+//           for (const serviceId in groupedData) {
+//               if (groupedData.hasOwnProperty(serviceId)) {
+//                   const group = groupedData[serviceId];
+//                   if (group.some((item: { port_code: string; }) => item.port_code === portCode)) {
+//                       // Find the corresponding service name based on serviceId
+//                       const serviceName = results.find(result => result.serviceId === serviceId)?.serviceName || '';
+//                       // Include service ID, service name, and group data in the matchingGroupedData
+//                       matchingGroupedData.push({ serviceId, group });
+//                   }
+//               }
+//           }
 
-          if (matchingGroupedData.length > 0) {
-              // The 'matchingGroupedData' variable contains the grouped data with a matching 'portCode'
-              console.log("Matching Grouped Data:", matchingGroupedData);
-          } else {
-              console.log("No matching grouped data found for the port code.");
-          }
-      },
-      error => {
-          console.warn("Error while fetching carrier services by service names", error);
-      }
-  );
-}
+//           if (matchingGroupedData.length > 0) {
+//               // Send the serviceId values to the backend
+//             // Convert serviceId values to numbers
+//             const serviceIdsToSend: string[] = matchingGroupedData.map(item => item.serviceId);
+//         debugger
+//             // Call the backend API to fetch service names
+//             this.carrierservice.getServicesbySId(serviceIdsToSend).subscribe(
+//               (serviceNames: string[]) => {
+//                 // Handle the response data here (serviceNames)
+//                 console.log("Service Names:", serviceNames);
+                
+//                 // Now you have the service names from the backend.
+//               },
+//               (error: any) => {
+//                 console.error("Error while fetching service names", error);
+//                 // Handle the error as needed.
+//               }
+//             );
+              
+//               this.matchingData = matchingGroupedData;
+//               console.log("assign values", this.matchingData);
+//               // The 'matchingGroupedData' variable contains the grouped data with a matching 'portCode'
+//               console.log("Matching Grouped Data:", matchingGroupedData);
+//           } else {
+//               console.log("No matching grouped data found for the port code.");
+//           }
+
+//           const portGroups: { [key: string]: string[] }[] = [];
+
+//           // Iterate through each group in matchingGroupedData
+//           matchingGroupedData.forEach(group => {
+//               const portCodes = group.group.map((item: any) => item.port_code);
+//               const groupPorts: { [key: string]: string[] } = {};
+//               // Iterate through each port_code in the group
+//               portCodes.forEach(portCode => {
+//                   // Find the corresponding port in the port_list array
+//                   const port = this.port_list.find((item: any) => item.port_code === portCode);
+//                   if (port) {
+//                       const latitude = port.latitude;
+//                       const longitude = port.longitude;
+//                       // Group the ports by their latitude and longitude for this group
+//                       const key = `${latitude.toFixed(2)}°,${longitude.toFixed(2)}°`;
+//                       if (!groupPorts[key]) {
+//                           groupPorts[key] = [];
+//                       }
+//                       groupPorts[key].push(port.port_name);
+//                   }
+//               });
+//               portGroups.push(groupPorts);
+//           });
+
+//           console.log(portGroups);
+
+//       },
+//       error => {
+//           console.warn("Error while fetching carrier services by service names", error);
+//       }
+//   );
+// }
+
+
+
+
 
 
   ngAfterViewInit() {
