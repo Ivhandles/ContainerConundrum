@@ -19,6 +19,12 @@ namespace CC_api.Repository
       var services = dbContext.carrier_service.Where(e => e.company_id == companyid).ToList();
       return services;
     }
+    public async Task<List<PortSequence>> GetPortSequenceDataByServiceIdAsync(int serviceId)
+    {
+      // Implement the logic to fetch port sequence data by serviceId from the database.
+      return await dbContext.port_sequence.Where(ps => ps.service_id == serviceId).ToListAsync();
+    }
+   
 
     public async Task<List<PortSequence>> GetPortSequencesByServiceName(string serviceName)
     {
@@ -30,6 +36,15 @@ namespace CC_api.Repository
       }
       return null;
     }
+    
+
+
+
+
+
+
+
+
 
 
 

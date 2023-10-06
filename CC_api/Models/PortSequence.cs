@@ -13,7 +13,7 @@ namespace CC_api.Models
     public int seq_no { get; set; }
 
     public int service_id { get; set; }
-
+  
   }
 
 

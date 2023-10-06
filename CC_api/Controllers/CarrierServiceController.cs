@@ -1,6 +1,8 @@
 using CC_api.Business;
 using CC_api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.ComponentModel.Design;
 
 namespace CC_api.Controllers
 {
@@ -67,9 +69,12 @@ namespace CC_api.Controllers
       }
       return NotFound();
     }
-
-
-
+    [HttpGet("GetInternalServicePortSequenceData")]
+    public async Task<ActionResult<Dictionary<int, List<PortSequence>>>> GetPortSequenceDataByServiceIdAndPortCode(int companyId, string portCode)
+    {
+      var portSequenceData = await servicesBusiness.GetPortSequenceDataAsync(companyId, portCode);
+      return Ok(portSequenceData);
+    }
 
   }
 }
