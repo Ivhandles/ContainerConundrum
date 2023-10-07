@@ -74,6 +74,9 @@ namespace CC_api.Controllers
     {
       var portSequenceData = await servicesBusiness.GetPortSequenceDataAsync(companyId, portCode);
       return Ok(portSequenceData);
+
+     
+
     }
 
   }
