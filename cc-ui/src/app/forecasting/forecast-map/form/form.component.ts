@@ -66,6 +66,8 @@ pickup_charges:any;
   @Input() portCode!: string;
   @Input() portId!: number;
   @Input() Totalsurplus: any;
+  @Input() portlatitude: any;
+  @Input() portlongitude: any;
   @Input() containersize!: number;
   @Input() containertype!: string;
   @Input() containerTypes!: string[];
@@ -467,7 +469,10 @@ onOptimizedViewButtonClick() {
     const port_code = this.portCode; // Replace with the actual port code you want to send
     const container_type = this.deifcitcontainerType; // Corrected variable name
     const container_size = this.deficitcontainerSize;
-    this.sharedservice.setData(port_code, container_type,container_size); // Call the setData method with the port_code and container_type values
+    this.sharedservice.setData(port_code, container_type,container_size);
+    const port_latitude = this.portlatitude;
+    const port_longitude = this.portlatitude;
+    this.sharedservice.setlatitudelongitude(port_latitude,port_longitude);
   }
 }
 

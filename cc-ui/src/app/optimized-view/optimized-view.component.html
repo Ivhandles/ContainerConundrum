@@ -94,9 +94,14 @@
     </div>
     
   </div>
-  <div *ngIf="matchingData">
-    You can use this Service.{{service_name}}
+  <div *ngIf="deficit_services && deficit_services.length > 0">
+    <div *ngFor="let service of deficit_services">
+      You can use this Service. {{ service.serviceName }}
+    </div>
   </div>
+  
+  
+  
   <div class="relative">
     <div #mapElement style="height: 563px; position: relative;"></div>
   </div>

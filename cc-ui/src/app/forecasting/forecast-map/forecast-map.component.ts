@@ -234,6 +234,8 @@ createMarker(port: any, iconUrl: string, surplusPercentage: number, deficitPerce
   const factory = this.resolver.resolveComponentFactory(FormComponent);
   const componentRef = factory.create(this.viewContainerRef.injector);
   componentRef.instance.portCode = port.portCode;
+  componentRef.instance.portlatitude = port.latitude;
+  componentRef.instance.portlongitude = port.longitude;
   componentRef.instance.portId = port.portId;
   componentRef.instance.surplus = port.surplus;
   componentRef.instance.deficit = port.deficit;
