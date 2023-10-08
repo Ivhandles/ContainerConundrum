@@ -4,7 +4,7 @@ import { ForecastingTableService } from '../forecasting/forecasting-table-view/f
 import * as XLSX from 'xlsx';
 import { SharedServiceService } from '../shared-service.service';
 import { distinctUntilChanged, filter, map, mergeMap, switchMap, takeUntil } from 'rxjs/operators';
-import { Subject, combineLatest, forkJoin, of } from 'rxjs';
+import { Subject, Subscription, combineLatest, forkJoin, of } from 'rxjs';
 import { CarrierServiceService } from '../carrier-service/carrier-service.service';
 
 @Component({
@@ -34,7 +34,12 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
   public carrierServices: any[] = [];
   matchingData: any[] = [];
   private unsubscribe$: Subject<void> = new Subject<void>();
-
+  portCode: any;
+  deficit_services: any[] | undefined;
+  private latitudeSubscription: Subscription | undefined;
+  private longitudeSubscription: Subscription | undefined;
+  private latitude: any;
+  private longitude: any;
   constructor(
     private sessionService: SessionService,
     private forecastingtableService: ForecastingTableService,
@@ -48,7 +53,17 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
     
    
     this.loadInitialData();
-   
+    this.latitudeSubscription = this.sharedService.PortLatitude$.subscribe((latitude: number) => {
+      // Handle latitude updates here
+      this.latitude = latitude;
+      this.initMap();
+    });
+
+    this.longitudeSubscription = this.sharedService.PortLongitude$.subscribe((longitude: number) => {
+      // Handle longitude updates here
+      this.longitude = longitude;
+      this.initMap();
+    });
    
     combineLatest([
       this.sharedService.selected_port,
@@ -87,6 +102,13 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    if (this.latitudeSubscription) {
+      this.latitudeSubscription.unsubscribe();
+    }
+
+    if (this.longitudeSubscription) {
+      this.longitudeSubscription.unsubscribe();
+    }
   }
 
   private loadInitialData(): void {
@@ -103,7 +125,7 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
       );
   }
 
-  private loadPortList(): void {
+  public loadPortList(): void {
     this.forecastingtableService.getAllPorts().subscribe(
       (data: any) => {
         this.port_list = data;
@@ -132,8 +154,8 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
     );
   }
   
-  filterData(receivedportCode: string, receivedcontainerType: string, receivedcontainerSize: string): void {
-    
+  async filterData(receivedportCode: string, receivedcontainerType: string, receivedcontainerSize: string): Promise<void> {
+    console.log("inside filter data",this.companyId);
     console.log('Searching for Port Code:', receivedportCode);
     
     this.forecastingtableService.getAllPorts().subscribe(
@@ -188,132 +210,46 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
         });
 
         console.log('Filtered Inventory with Surplus > Deficit:', filteredInventoryWithSurplus);
-
+ await this.getDeficitServices(receivedportCode);
     } else {
         console.log('No matching port found.');
     }
-    // this.filterservices(receivedportCode);
+  
 }
 
-// filterservices(portCode: string) {
-//   console.log("Port code received inside filterservices", portCode);
-//   const allData: any[] = [];
-//   const matchingGroupedData: { serviceId: string, group: any[] }[] = [];
 
-//   // Fetch the initial service names
-//   this.carrierservice.getCarrierServicesbyCId(this.companyId).pipe(
-//       mergeMap((data: any[]) => {
-//           // Create an array of observables for each service name
-//           const observables = data.map(service => {
-//               const serviceId = service.service_id;
-//               const serviceName = service.service_name;
-//               console.log("get service by cid", serviceName);
-//               // Fetch data for each service name and return the observable
-//               return this.carrierservice.getCarrierServicesbySName(serviceName).pipe(
-//                   map((serviceData: any[]) => {
-//                       // Combine the service ID, service name, and its data into an object
-//                       return { serviceId, serviceName, serviceData };
-//                   })
-//               );
-//           });
+async getDeficitServices(portCode: string) {
+  debugger;
+  console.log(this.companyId);
+  this.carrierservice.getServicesforDeficit(this.companyId, portCode).subscribe(
+    async (response: any) => {
+      // Handle the response here as an object
+      console.log('Received response as an object:', response);
 
-//           // Use forkJoin to combine the results of all observables into a single observable
-//           return forkJoin(observables);
-//       })
-//   ).subscribe(
-//       (results: { serviceId: string, serviceName: string, serviceData: any[] }[]) => {
-//           results.forEach(result => {
+      // Convert the object to an array format
+      const responseArray: any[] = Object.values(response);
 
-//               allData.push(...result.serviceData);
-//           });
+      // Now you have the response as an array and can work with it as needed
+      console.log('Converted response to an array:', responseArray);
+      this.deficit_services = responseArray;
+console.log("to check", this.deficit_services);
 
-//           // Group data by service_id
-//           const groupedData = allData.reduce((acc, item) => {
-//               const serviceId = item.service_id;
-//               if (!acc[serviceId]) {
-//                   acc[serviceId] = [];
-//               }
-//               acc[serviceId].push(item);
-//               return acc;
-//           }, {});
+     
+    }
+  );
+}
 
-//           // The 'groupedData' object now contains arrays of data grouped by service_id
-//           console.log("Grouped Data:", groupedData);
-
-//           // Check if the 'portCode' matches in any of the grouped data and store matching groups
-//           for (const serviceId in groupedData) {
-//               if (groupedData.hasOwnProperty(serviceId)) {
-//                   const group = groupedData[serviceId];
-//                   if (group.some((item: { port_code: string; }) => item.port_code === portCode)) {
-//                       // Find the corresponding service name based on serviceId
-//                       const serviceName = results.find(result => result.serviceId === serviceId)?.serviceName || '';
-//                       // Include service ID, service name, and group data in the matchingGroupedData
-//                       matchingGroupedData.push({ serviceId, group });
-//                   }
-//               }
-//           }
-
-//           if (matchingGroupedData.length > 0) {
-//               // Send the serviceId values to the backend
-//             // Convert serviceId values to numbers
-//             const serviceIdsToSend: string[] = matchingGroupedData.map(item => item.serviceId);
-//         debugger
-//             // Call the backend API to fetch service names
-//             this.carrierservice.getServicesbySId(serviceIdsToSend).subscribe(
-//               (serviceNames: string[]) => {
-//                 // Handle the response data here (serviceNames)
-//                 console.log("Service Names:", serviceNames);
-                
-//                 // Now you have the service names from the backend.
-//               },
-//               (error: any) => {
-//                 console.error("Error while fetching service names", error);
-//                 // Handle the error as needed.
-//               }
-//             );
-              
-//               this.matchingData = matchingGroupedData;
-//               console.log("assign values", this.matchingData);
-//               // The 'matchingGroupedData' variable contains the grouped data with a matching 'portCode'
-//               console.log("Matching Grouped Data:", matchingGroupedData);
-//           } else {
-//               console.log("No matching grouped data found for the port code.");
-//           }
-
-//           const portGroups: { [key: string]: string[] }[] = [];
-
-//           // Iterate through each group in matchingGroupedData
-//           matchingGroupedData.forEach(group => {
-//               const portCodes = group.group.map((item: any) => item.port_code);
-//               const groupPorts: { [key: string]: string[] } = {};
-//               // Iterate through each port_code in the group
-//               portCodes.forEach(portCode => {
-//                   // Find the corresponding port in the port_list array
-//                   const port = this.port_list.find((item: any) => item.port_code === portCode);
-//                   if (port) {
-//                       const latitude = port.latitude;
-//                       const longitude = port.longitude;
-//                       // Group the ports by their latitude and longitude for this group
-//                       const key = `${latitude.toFixed(2)}°,${longitude.toFixed(2)}°`;
-//                       if (!groupPorts[key]) {
-//                           groupPorts[key] = [];
-//                       }
-//                       groupPorts[key].push(port.port_name);
-//                   }
-//               });
-//               portGroups.push(groupPorts);
-//           });
-
-//           console.log(portGroups);
-
-//       },
-//       error => {
-//           console.warn("Error while fetching carrier services by service names", error);
-//       }
-//   );
-// }
-
-
+async fetchLatitudeAndLongitude(portCode: string) {
+  this.forecastingtableService.getAllPorts().subscribe(
+    (data: any) => {
+      this.port_list = data;
+      console.log("PortData",this.port_list)
+    },
+    (error: any) => {
+      console.error('Error retrieving company ID:', error);
+    }
+  );
+}
 
 
 
@@ -327,17 +263,31 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
   
 
   initMap() {
-    if (this.mapElement) {
+    debugger
+    // Check if the mapElement exists and if both latitude and longitude are defined
+    if (this.mapElement && this.latitude !== undefined && this.longitude !== undefined) {
       const mapElement = this.mapElement.nativeElement;
       const mapOptions: google.maps.MapOptions = {
-        center: { lat: 37.7749, lng: -122.4194 },
-        zoom: 10,
+        center: { lat: this.latitude, lng: this.longitude },
+        zoom: 3,
         mapId: '2b03aff8b2fb72a3'
       };
 
       this.map = new google.maps.Map(mapElement, mapOptions);
+
+      // Add a red marker at the specified latitude and longitude
+      const marker = new google.maps.Marker({
+        position: { lat: this.latitude, lng: this.longitude },
+        map: this.map,
+        icon: {
+          url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+          scaledSize: new google.maps.Size(30, 30)
+        },
+        title: this.receivedportCode
+      });
     }
   }
+
 
   onPortSelected(selectedPortName: string) {
     if (selectedPortName === 'Select Port') {
