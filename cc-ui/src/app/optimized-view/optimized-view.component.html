@@ -94,8 +94,8 @@
     </div>
     
   </div>
-  <div *ngIf="deficit_services && deficit_services.length > 0">
-    <div *ngFor="let service of deficit_services">
+  <div *ngIf="matchedService && matchedService.length > 0">
+    <div *ngFor="let service of matchedService">
       You can use this Service. {{ service.serviceName }}
     </div>
   </div>

@@ -71,6 +71,7 @@ namespace CC_api.Business
             .Select(ps => new PortSequence
             {
               port_id = ps.port_id,
+              port_name = ps.port_name,
               port_code = ps.port_code,
               seq_no = ps.seq_no
             })

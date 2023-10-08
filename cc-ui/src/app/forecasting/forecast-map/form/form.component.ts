@@ -86,6 +86,8 @@ pickup_charges:any;
   ssurplusCount: any; 
   @Output() optimizedViewRequested = new EventEmitter<void>();
   @Output() dataToChild = new EventEmitter<any>();
+  deficit_services: any[] = [];
+  router: any;
   get filteredContainerTypes(): string[] {
     if (this.portCode) {
       // Filter and remove the port code prefix from container types based on the selected port code
@@ -465,16 +467,22 @@ async updateDeficitCount(portCode: any, deifcitcontainerType: any, deficitcontai
 }
 // Define your method to handle the button click
 onOptimizedViewButtonClick() {
+  debugger;
   if (this.isOptimizedViewEnabled()) {
-    const port_code = this.portCode; // Replace with the actual port code you want to send
+    const port_code = this.portCode;
     const container_type = this.deifcitcontainerType; // Corrected variable name
     const container_size = this.deficitcontainerSize;
-    this.sharedservice.setData(port_code, container_type,container_size);
+    this.sharedservice.setData(port_code, container_type, container_size);
+
     const port_latitude = this.portlatitude;
-    const port_longitude = this.portlatitude;
-    this.sharedservice.setlatitudelongitude(port_latitude,port_longitude);
+    const port_longitude = this.portlongitude; // Corrected variable name
+    this.sharedservice.setlatitudelongitude(port_latitude, port_longitude);
+  
+
+    
   }
 }
+
 
 
 
