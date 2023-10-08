@@ -11,6 +11,7 @@ export class SharedServiceService {
   private selectedContainerSize = new BehaviorSubject<string>('');
   private portlatitude = new BehaviorSubject<number>(0);
   private portlongitude = new BehaviorSubject<number>(0);
+  private deficitServicesData: any[] = [];
   registeredEmail$ = this.registeredEmailSource.asObservable();
   
   selected_port =this.PortSelected.asObservable();
@@ -33,5 +34,12 @@ setlatitudelongitude(latitude:any,longitude:any)
 {
 this.portlatitude.next(latitude);
 this.portlongitude.next(longitude);
+}
+setDeficitServices(data: any[]) {
+  this.deficitServicesData = data;
+}
+
+getDeficitServices() {
+  return this.deficitServicesData;
 }
 }

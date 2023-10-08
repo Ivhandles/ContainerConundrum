@@ -32,7 +32,7 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
   services: any[] = [];
   router: any;
   public carrierServices: any[] = [];
-  matchingData: any[] = [];
+  latlong:any[]=[];
   private unsubscribe$: Subject<void> = new Subject<void>();
   portCode: any;
   deficit_services: any[] | undefined;
@@ -40,6 +40,8 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
   private longitudeSubscription: Subscription | undefined;
   private latitude: any;
   private longitude: any;
+  matchedService:any[] = [];
+  filteredInventoryData: Inventory[] = [];
   constructor(
     private sessionService: SessionService,
     private forecastingtableService: ForecastingTableService,
@@ -50,19 +52,32 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
  
 
   ngOnInit(): void {
-    
+  
+
    
     this.loadInitialData();
+    let latitudeReceived = false;
+    let longitudeReceived = false;
     this.latitudeSubscription = this.sharedService.PortLatitude$.subscribe((latitude: number) => {
       // Handle latitude updates here
       this.latitude = latitude;
-      this.initMap();
+      latitudeReceived = true;
+    
+      // Check if both latitude and longitude values have been received
+      if (latitudeReceived && longitudeReceived) {
+        this.initMap();
+      }
     });
-
+    
     this.longitudeSubscription = this.sharedService.PortLongitude$.subscribe((longitude: number) => {
       // Handle longitude updates here
       this.longitude = longitude;
-      this.initMap();
+      longitudeReceived = true;
+    
+      // Check if both latitude and longitude values have been received
+      if (latitudeReceived && longitudeReceived) {
+        this.initMap();
+      }
     });
    
     combineLatest([
@@ -145,7 +160,7 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
         console.log('Inventory list by company id is fetched:', this.inventory_list_by_companyId);
         this.filteredInventoryList = this.inventory_list_by_companyId;
 
-        // Call filterData here after loading all data
+        
         this.filterData(this.receivedportCode, this.receivedcontainerType, this.receivedcontainerSize);
       },
       (error: any) => {
@@ -208,18 +223,18 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
             const deficit = inventory.deficit;
             return surplus > deficit; 
         });
-
+this.filteredInventoryData = filteredInventoryWithSurplus;
         console.log('Filtered Inventory with Surplus > Deficit:', filteredInventoryWithSurplus);
- await this.getDeficitServices(receivedportCode);
+
     } else {
         console.log('No matching port found.');
     }
-  
+  await this.getDeficitServices(receivedportCode);
 }
 
 
 async getDeficitServices(portCode: string) {
-  debugger;
+
   console.log(this.companyId);
   this.carrierservice.getServicesforDeficit(this.companyId, portCode).subscribe(
     async (response: any) => {
@@ -232,24 +247,72 @@ async getDeficitServices(portCode: string) {
       // Now you have the response as an array and can work with it as needed
       console.log('Converted response to an array:', responseArray);
       this.deficit_services = responseArray;
-console.log("to check", this.deficit_services);
+      console.log("to check deficit_services", this.deficit_services);
+      this.sharedService.setDeficitServices(this.deficit_services);
 
-     
+      // Initialize an array to store the matched deficit services
+      const matchedData: any[] = [];
+
+      // Iterate through each element in filteredInventoryData
+      for (const surplusInventory of this.filteredInventoryData) {
+        // Iterate through the entire deficit_services array
+        for (const deficitService of this.deficit_services) {
+          // Iterate through portSequences in the deficitService
+          for (const portSequence of deficitService.portSequences) {
+            // Check if there is a match based on port_id
+            if (surplusInventory.port_id === portSequence.port_id) {
+              // If a match is found, push the deficitService element to the matchedData array
+              matchedData.push(deficitService);
+            }
+          }
+        }
+      }
+      this.matchedService = matchedData;
+        // Now you have the matched deficit services in the matchedData array
+        console.log("Matched deficit services:", matchedData);
+        console.log("Matched deficit services:", this.matchedService);
+        const latLongData: any[] = [];
+
+        // Iterate through each item in the matchedService array
+        for (const matchedServiceItem of this.matchedService) {
+          // Extract serviceName from the matchedServiceItem
+          const { serviceName } = matchedServiceItem;
+      
+          // Iterate through portSequences within the matchedServiceItem
+          for (const portSequence of matchedServiceItem.portSequences) {
+            // Retrieve port_id and port_name from portSequence
+            const { port_id, port_name } = portSequence;
+      
+            // Find the port data in this.port_list using port_id
+            const portData = this.port_list.find((portItem) => portItem.port_id === port_id);
+      
+            if (portData) {
+              // Extract the latitude and longitude
+              const { latitude, longitude } = portData;
+      
+              // Push the data to the latLongData array
+              latLongData.push({ serviceName, port_id, port_name, latitude, longitude });
+            }
+          }
+        }
+      this.latlong = latLongData;
+      this.initMap();
+      
+      console.log("to check",this.latlong);
+        // Now you have the latitude, longitude, serviceName, port_id, and port_name data in latLongData
+        console.log("Latitude, Longitude, ServiceName, Port ID, and Port Name Data:", latLongData);
+
+    
+      // You can do further processing or store this data as needed.
     }
   );
 }
 
-async fetchLatitudeAndLongitude(portCode: string) {
-  this.forecastingtableService.getAllPorts().subscribe(
-    (data: any) => {
-      this.port_list = data;
-      console.log("PortData",this.port_list)
-    },
-    (error: any) => {
-      console.error('Error retrieving company ID:', error);
-    }
-  );
-}
+
+
+
+
+
 
 
 
@@ -261,9 +324,8 @@ async fetchLatitudeAndLongitude(portCode: string) {
 
  
   
-
   initMap() {
-    debugger
+    console.log("to inside initmap check",this.latlong);
     // Check if the mapElement exists and if both latitude and longitude are defined
     if (this.mapElement && this.latitude !== undefined && this.longitude !== undefined) {
       const mapElement = this.mapElement.nativeElement;
@@ -272,9 +334,9 @@ async fetchLatitudeAndLongitude(portCode: string) {
         zoom: 3,
         mapId: '2b03aff8b2fb72a3'
       };
-
+  
       this.map = new google.maps.Map(mapElement, mapOptions);
-
+  
       // Add a red marker at the specified latitude and longitude
       const marker = new google.maps.Marker({
         position: { lat: this.latitude, lng: this.longitude },
@@ -285,9 +347,36 @@ async fetchLatitudeAndLongitude(portCode: string) {
         },
         title: this.receivedportCode
       });
+  debugger
+      // Loop through the latLongData array and create green markers for each data point's port
+      for (const dataPoint of this.latlong) {
+        const { latitude, longitude, port_id, port_name } = dataPoint;
+  
+        // Create a green marker for the current data point's port
+        const greenMarker = new google.maps.Marker({
+          position: { lat: latitude, lng: longitude },
+          map: this.map,
+          icon: {
+            url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+            scaledSize: new google.maps.Size(30, 30)
+          },
+          title: `Port ID: ${port_id}, Port Name: ${port_name}`
+        });
+        const line = new google.maps.Polyline({
+          path: [
+            { lat: latitude, lng: longitude },
+            { lat: this.latitude, lng: this.longitude }
+          ],
+          geodesic: true,
+          strokeColor: 'green',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+        line.setMap(this.map);
+      }
     }
   }
-
+  
 
   onPortSelected(selectedPortName: string) {
     if (selectedPortName === 'Select Port') {
