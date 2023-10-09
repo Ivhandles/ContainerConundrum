@@ -1,4 +1,5 @@
 using CC_api.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CC_api.Repository
@@ -39,8 +40,7 @@ namespace CC_api.Repository
       {
         return queryResults;
       }
-
-      throw new ArgumentException("No seq_no values found for PortCode: " + portCode);
+      return new List<int>();
     }
     public async Task<string> GetServiceNameByIdAsync(int serviceId)
     {

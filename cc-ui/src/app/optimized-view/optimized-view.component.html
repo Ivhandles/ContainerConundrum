@@ -107,10 +107,16 @@
   </ng-container>
   
   <ng-template #noService>
-    <div *ngIf="!loading && (!matchedService || matchedService.length === 0)">
-      There is no service. You can Search an Ad for this Criteria <button  class="inline-flex justify-center btn-primary items-center space-x-2 border font-medium focus:outline-none w-full py-2 px-2 pr-2 leading-6 font-poppins border-blue-700  text-white active:border-blue-700">Search Ads</button>
-    </div>
+    <ng-container *ngIf="!loading && (!matchedService || matchedService.length === 0)">
+      There is no service. You can Search an Ad for this Criteria
+      <button
+        class="inline-flex justify-center btn-primary items-center space-x-2 border font-medium focus:outline-none w-full py-2 px-2 pr-2 leading-6 font-poppins border-blue-700 text-white active:border-blue-700"
+      >
+        Search Ads
+      </button>
+    </ng-container>
   </ng-template>
+  
   
   
   
