@@ -56,11 +56,7 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
   
 
    
-    setTimeout(() => {
-      // Once data is loaded, set loading to false
-      this.loading = false;
-    }, 2000); // Replace 2000 with the actual time it takes to load data
-     
+   
    
   
     this.loadInitialData();
@@ -244,12 +240,14 @@ this.filteredInventoryData = filteredInventoryWithSurplus;
 
 async getDeficitServices(portCode: string) {
   this.loading = true;
+  let dataReceived = false; // Flag to track data reception
+
   console.log(this.companyId);
   this.carrierservice.getServicesforDeficit(this.companyId, portCode).subscribe(
     async (response: any) => {
       // Handle the response here as an object
       console.log('Received response as an object:', response);
-      this.loading = false;
+
       // Convert the object to an array format
       const responseArray: any[] = Object.values(response);
 
@@ -257,7 +255,6 @@ async getDeficitServices(portCode: string) {
       console.log('Converted response to an array:', responseArray);
       this.deficit_services = responseArray;
       console.log("to check deficit_services", this.deficit_services);
-      
 
       // Initialize an array to store the matched deficit services
       const matchedData: any[] = [];
@@ -277,46 +274,59 @@ async getDeficitServices(portCode: string) {
         }
       }
       this.matchedService = matchedData;
-        // Now you have the matched deficit services in the matchedData array
-        console.log("Matched deficit services:", matchedData);
-        console.log("Matched deficit services:", this.matchedService);
-        const latLongData: any[] = [];
 
-        // Iterate through each item in the matchedService array
-        for (const matchedServiceItem of this.matchedService) {
-          // Extract serviceName from the matchedServiceItem
-          const { serviceName } = matchedServiceItem;
-      
-          // Iterate through portSequences within the matchedServiceItem
-          for (const portSequence of matchedServiceItem.portSequences) {
-            // Retrieve port_id and port_name from portSequence
-            const { port_id, port_name } = portSequence;
-      
-            // Find the port data in this.port_list using port_id
-            const portData = this.port_list.find((portItem) => portItem.port_id === port_id);
-      
-            if (portData) {
-              // Extract the latitude and longitude
-              const { latitude, longitude } = portData;
-      
-              // Push the data to the latLongData array
-              latLongData.push({ serviceName, port_id, port_name, latitude, longitude });
-            }
+      // Set the dataReceived flag to true when data is received
+      dataReceived = true;
+
+      // Now you have the matched deficit services in the matchedData array
+      console.log("Matched deficit services:", matchedData);
+      console.log("Matched deficit services:", this.matchedService);
+      const latLongData: any[] = [];
+
+      // Iterate through each item in the matchedService array
+      for (const matchedServiceItem of this.matchedService) {
+        // Extract serviceName from the matchedServiceItem
+        const { serviceName } = matchedServiceItem;
+
+        // Iterate through portSequences within the matchedServiceItem
+        for (const portSequence of matchedServiceItem.portSequences) {
+          // Retrieve port_id and port_name from portSequence
+          const { port_id, port_name } = portSequence;
+
+          // Find the port data in this.port_list using port_id
+          const portData = this.port_list.find((portItem) => portItem.port_id === port_id);
+
+          if (portData) {
+            // Extract the latitude and longitude
+            const { latitude, longitude } = portData;
+
+            // Push the data to the latLongData array
+            latLongData.push({ serviceName, port_id, port_name, latitude, longitude });
           }
         }
+      }
       this.latlong = latLongData;
-      this.loading = false;
+
       this.initMap();
       
-      console.log("to check",this.latlong);
-        // Now you have the latitude, longitude, serviceName, port_id, and port_name data in latLongData
-        console.log("Latitude, Longitude, ServiceName, Port ID, and Port Name Data:", latLongData);
+      // Move the loading flag setting here, inside the subscribe block
+      this.loading = false;
+      console.log("to check", this.latlong);
+      // Now you have the latitude, longitude, serviceName, port_id, and port_name data in latLongData
+      console.log("Latitude, Longitude, ServiceName, Port ID, and Port Name Data:", latLongData);
 
-    
       // You can do further processing or store this data as needed.
     }
   );
+
+  // Remove this block as it's not needed
+  // Check the dataReceived flag before setting loading to false
+  // if (!dataReceived) {
+  //   this.loading = false;
+  // }
 }
+
+
 
 
 
@@ -326,60 +336,70 @@ async getDeficitServices(portCode: string) {
 ngAfterViewInit() {
     this.initMap();
 }
-  
-  initMap() {
-    console.log("to inside initmap check",this.latlong);
-    // Check if the mapElement exists and if both latitude and longitude are defined
-    if (this.mapElement && this.latitude !== undefined && this.longitude !== undefined) {
-      const mapElement = this.mapElement.nativeElement;
-      const mapOptions: google.maps.MapOptions = {
-        center: { lat: this.latitude, lng: this.longitude },
-        zoom: 3,
-        mapId: '2b03aff8b2fb72a3'
-      };
-  
-      this.map = new google.maps.Map(mapElement, mapOptions);
-  
-      // Add a red marker at the specified latitude and longitude
+initMap() {
+  console.log("to inside initmap check", this.latlong);
+
+  // Check if the mapElement exists and if both latitude and longitude are defined
+  if (this.mapElement && this.latitude !== undefined && this.longitude !== undefined) {
+    const mapElement = this.mapElement.nativeElement;
+    const mapOptions: google.maps.MapOptions = {
+      center: { lat: this.latitude, lng: this.longitude },
+      zoom: 3,
+      mapId: '2b03aff8b2fb72a3'
+    };
+
+    this.map = new google.maps.Map(mapElement, mapOptions);
+
+    // Add a red marker at the specified latitude and longitude
+    const redMarker = new google.maps.Marker({
+      position: { lat: this.latitude, lng: this.longitude },
+      map: this.map,
+      icon: {
+        url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        scaledSize: new google.maps.Size(30, 30)
+      },
+      title: this.receivedportCode
+    });
+
+   
+const lineColors = ['green', 'rgba(0, 0, 139, 1)', 'orange', 'purple', 'yellow', 'cyan'];
+
+    // Loop through the latLongData array and create markers and lines
+    for (let i = 0; i < this.latlong.length; i++) {
+      const dataPoint = this.latlong[i];
+      const { latitude, longitude, port_id, port_name } = dataPoint;
+
+      // Create a marker for the current data point's port
+      const markerColor = 'green';
       const marker = new google.maps.Marker({
-        position: { lat: this.latitude, lng: this.longitude },
+        position: { lat: latitude, lng: longitude },
         map: this.map,
         icon: {
-          url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+          url: `http://maps.google.com/mapfiles/ms/icons/${markerColor}-dot.png`,
           scaledSize: new google.maps.Size(30, 30)
         },
-        title: this.receivedportCode
+        title: `Port ID: ${port_id}, Port Name: ${port_name}`
       });
-  debugger
-      // Loop through the latLongData array and create green markers for each data point's port
-      for (const dataPoint of this.latlong) {
-        const { latitude, longitude, port_id, port_name } = dataPoint;
-  
-        // Create a green marker for the current data point's port
-        const greenMarker = new google.maps.Marker({
-          position: { lat: latitude, lng: longitude },
-          map: this.map,
-          icon: {
-            url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-            scaledSize: new google.maps.Size(30, 30)
-          },
-          title: `Port ID: ${port_id}, Port Name: ${port_name}`
-        });
-        const line = new google.maps.Polyline({
-          path: [
-            { lat: latitude, lng: longitude },
-            { lat: this.latitude, lng: this.longitude }
-          ],
-          geodesic: true,
-          strokeColor: 'green',
-          strokeOpacity: 1.0,
-          strokeWeight: 2
-        });
-        line.setMap(this.map);
-      }
+
+      // Generate a random line color for each data point
+      const randomColor = lineColors[Math.floor(Math.random() * lineColors.length)];
+
+      // Create a polyline from the data point to the red marker with the random line color
+      const line = new google.maps.Polyline({
+        path: [
+          { lat: latitude, lng: longitude },
+          { lat: this.latitude, lng: this.longitude }
+        ],
+        geodesic: true,
+        strokeColor: randomColor,
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+      });
+      line.setMap(this.map);
     }
   }
-  
+}
+
 
   onPortSelected(selectedPortName: string) {
     if (selectedPortName === 'Select Port') {

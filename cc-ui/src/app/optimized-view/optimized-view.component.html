@@ -96,20 +96,25 @@
   </div>
   <br/>
 
-  <div *ngIf="  matchedService && matchedService.length > 0">
+  <div *ngIf="loading" class="loading-bar">
+    <div class="loading-bar-inner"></div>
+  </div>
+  
+  <ng-container *ngIf="matchedService !== undefined; else noService">
     <div *ngFor="let service of matchedService">
       You can use this Service. {{ service.serviceName }}
     </div>
-  </div>
-  <div *ngIf="loading">
-    <!-- Display a loading spinner or message here -->
-    Loading...
-  </div>
-  <div *ngIf="!loading && matchedService && matchedService.length === 0" class="style">
-    There is no Service you can Use. You can search an AD for this Criteria.
-    <button class="inline-flex justify-center btn-primary items-center space-x-2 border font-medium focus:outline-none w-full py-2 px-2 pr-2 leading-6 font-poppins border-blue-700 text-white active:border-blue-700" routerLink="/view-other-ads">Search Ads</button>
-  </div>
+  </ng-container>
   
+  <ng-template #noService>
+    <div *ngIf="!loading && (!matchedService || matchedService.length === 0)">
+      There is no service. You can Search an Ad for this Criteria <button  class="inline-flex justify-center btn-primary items-center space-x-2 border font-medium focus:outline-none w-full py-2 px-2 pr-2 leading-6 font-poppins border-blue-700  text-white active:border-blue-700">Search Ads</button>
+    </div>
+  </ng-template>
+  
+  
+  
+ 
   
   <br/>
   
