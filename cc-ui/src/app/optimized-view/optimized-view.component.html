@@ -95,23 +95,31 @@
     
   </div>
   <br/>
-
-  <div *ngIf="loading" class="loading-bar">
+<!-- Loading indicator when data is loading -->
+<div *ngIf="loading" class="loading-bar">
   <div class="loading-bar-inner"></div>
 </div>
 
-<ng-container *ngIf=" !loading && matchedService && matchedService.length === 0; else noService">
-  <div style="textstyles">
-    There is no service. You can Search an Ad for this Criteria &nbsp;<button  class=" btnstyle" routerLink="/view-other-ads">Search Ads</button>
+<ng-container *ngIf="!loading">
+  <!-- If matchedService is empty, display "No service" message and "Search Ads" button -->
+  <div *ngIf="matchedService && matchedService.length === 0" style="textstyles">
+    There is no service. You can Search an Ad for this Criteria &nbsp;
+    <button class="btnstyle" routerLink="/view-other-ads">Search Ads</button>
   </div>
+
+  <!-- If matchedService is not empty, display service-related content -->
+  <ng-container *ngIf="matchedService && matchedService.length > 0; else Service">
+    <ng-container *ngTemplateOutlet="Service"></ng-container>
+  </ng-container>
 </ng-container>
 
-<ng-template #noService>
+<ng-template #Service>
   <!-- Your default content when matchedService is not empty -->
   <div *ngFor="let service of matchedService">
     You can use this Service. {{ service.serviceName }}
   </div>
 </ng-template>
+
 
   
   
