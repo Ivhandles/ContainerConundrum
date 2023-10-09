@@ -100,7 +100,9 @@
   <div class="loading-bar-inner"></div>
 </div>
 
-<ng-container *ngIf="!loading">
+<!-- Check if the method is executed completely -->
+<ng-container *ngIf="methodExecuted">
+
   <!-- If matchedService is empty, display "No service" message and "Search Ads" button -->
   <div *ngIf="matchedService && matchedService.length === 0" style="textstyles">
     There is no service. You can Search an Ad for this Criteria &nbsp;
@@ -112,6 +114,7 @@
     <ng-container *ngTemplateOutlet="Service"></ng-container>
   </ng-container>
 </ng-container>
+
 
 <ng-template #Service>
   <!-- Your default content when matchedService is not empty -->
