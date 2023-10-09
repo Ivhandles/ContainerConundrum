@@ -319,11 +319,7 @@ async getDeficitServices(portCode: string) {
     }
   );
 
-  // Remove this block as it's not needed
-  // Check the dataReceived flag before setting loading to false
-  // if (!dataReceived) {
-  //   this.loading = false;
-  // }
+ 
 }
 
 
