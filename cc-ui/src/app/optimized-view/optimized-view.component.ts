@@ -238,88 +238,56 @@ this.filteredInventoryData = filteredInventoryWithSurplus;
 }
 
 
+
+
 async getDeficitServices(portCode: string) {
   this.loading = true;
-  let dataReceived = false; // Flag to track data reception
 
-  console.log(this.companyId);
-  this.carrierservice.getServicesforDeficit(this.companyId, portCode).subscribe(
-    async (response: any) => {
-      // Handle the response here as an object
-      console.log('Received response as an object:', response);
+  try {
+    const response: any = await this.carrierservice.getServicesforDeficit(this.companyId, portCode).toPromise();
+    
+    const deficitServices: DeficitService[] = Object.values(response);
 
-      // Convert the object to an array format
-      const responseArray: any[] = Object.values(response);
+    const matchedData: DeficitService[] = [];
 
-      // Now you have the response as an array and can work with it as needed
-      console.log('Converted response to an array:', responseArray);
-      this.deficit_services = responseArray;
-      console.log("to check deficit_services", this.deficit_services);
-
-      // Initialize an array to store the matched deficit services
-      const matchedData: any[] = [];
-
-      // Iterate through each element in filteredInventoryData
-      for (const surplusInventory of this.filteredInventoryData) {
-        // Iterate through the entire deficit_services array
-        for (const deficitService of this.deficit_services) {
-          // Iterate through portSequences in the deficitService
-          for (const portSequence of deficitService.portSequences) {
-            // Check if there is a match based on port_id
-            if (surplusInventory.port_id === portSequence.port_id) {
-              // If a match is found, push the deficitService element to the matchedData array
-              matchedData.push(deficitService);
-            }
+    for (const surplusInventory of this.filteredInventoryData) {
+      for (const deficitService of deficitServices) {
+        for (const portSequence of deficitService.portSequences) {
+          if (surplusInventory.port_id === portSequence.port_id) {
+            matchedData.push(deficitService);
           }
         }
       }
-      this.matchedService = matchedData;
-
-      // Set the dataReceived flag to true when data is received
-      dataReceived = true;
-
-      // Now you have the matched deficit services in the matchedData array
-      console.log("Matched deficit services:", matchedData);
-      console.log("Matched deficit services:", this.matchedService);
-      const latLongData: any[] = [];
-
-      // Iterate through each item in the matchedService array
-      for (const matchedServiceItem of this.matchedService) {
-        // Extract serviceName from the matchedServiceItem
-        const { serviceName } = matchedServiceItem;
-
-        // Iterate through portSequences within the matchedServiceItem
-        for (const portSequence of matchedServiceItem.portSequences) {
-          // Retrieve port_id and port_name from portSequence
-          const { port_id, port_name } = portSequence;
-
-          // Find the port data in this.port_list using port_id
-          const portData = this.port_list.find((portItem) => portItem.port_id === port_id);
-
-          if (portData) {
-            // Extract the latitude and longitude
-            const { latitude, longitude } = portData;
-
-            // Push the data to the latLongData array
-            latLongData.push({ serviceName, port_id, port_name, latitude, longitude });
-          }
-        }
-      }
-      this.latlong = latLongData;
-
-      this.initMap();
-      
-      // Move the loading flag setting here, inside the subscribe block
-      this.loading = false;
-      console.log("to check", this.latlong);
-      // Now you have the latitude, longitude, serviceName, port_id, and port_name data in latLongData
-      console.log("Latitude, Longitude, ServiceName, Port ID, and Port Name Data:", latLongData);
-
-      // You can do further processing or store this data as needed.
     }
-  );
 
- 
+    this.matchedService = matchedData;
+    console.log("to check",this.matchedService)
+    const latLongData: any[] = [];
+
+    for (const matchedServiceItem of this.matchedService) {
+      const { serviceName } = matchedServiceItem;
+      
+      for (const portSequence of matchedServiceItem.portSequences) {
+        const { port_id, port_name } = portSequence;
+
+        const portData = this.port_list.find((portItem) => portItem.port_id === port_id);
+
+        if (portData) {
+          const { latitude, longitude } = portData;
+          latLongData.push({ serviceName, port_id, port_name, latitude, longitude });
+        }
+      }
+    }
+
+    this.latlong = latLongData;
+
+    this.initMap();
+
+    this.loading = false;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    this.loading = false;
+  }
 }
 
 
@@ -465,3 +433,14 @@ interface Inventory {
   surplus: number;
   deficit: number;
 } 
+interface DeficitService {
+  serviceName: string;
+  portSequences: PortSequence[];
+  // Add other properties as needed
+}
+
+interface PortSequence {
+  port_id: number;
+  port_name: string;
+  // Add other properties as needed
+}
