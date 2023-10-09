@@ -30,6 +30,7 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
   public company_id?: number;
   service_id?:number;
   services: any[] = [];
+  loading = true;
   router: any;
   public carrierServices: any[] = [];
   latlong:any[]=[];
@@ -55,6 +56,13 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
   
 
    
+    setTimeout(() => {
+      // Once data is loaded, set loading to false
+      this.loading = false;
+    }, 2000); // Replace 2000 with the actual time it takes to load data
+     
+   
+  
     this.loadInitialData();
     let latitudeReceived = false;
     let longitudeReceived = false;
@@ -114,6 +122,7 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
     
    
   }
+
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
@@ -234,13 +243,13 @@ this.filteredInventoryData = filteredInventoryWithSurplus;
 
 
 async getDeficitServices(portCode: string) {
-
+  this.loading = true;
   console.log(this.companyId);
   this.carrierservice.getServicesforDeficit(this.companyId, portCode).subscribe(
     async (response: any) => {
       // Handle the response here as an object
       console.log('Received response as an object:', response);
-
+      this.loading = false;
       // Convert the object to an array format
       const responseArray: any[] = Object.values(response);
 
@@ -248,7 +257,7 @@ async getDeficitServices(portCode: string) {
       console.log('Converted response to an array:', responseArray);
       this.deficit_services = responseArray;
       console.log("to check deficit_services", this.deficit_services);
-      this.sharedService.setDeficitServices(this.deficit_services);
+      
 
       // Initialize an array to store the matched deficit services
       const matchedData: any[] = [];
@@ -296,6 +305,7 @@ async getDeficitServices(portCode: string) {
           }
         }
       this.latlong = latLongData;
+      this.loading = false;
       this.initMap();
       
       console.log("to check",this.latlong);
@@ -313,16 +323,9 @@ async getDeficitServices(portCode: string) {
 
 
 
-
-
-
-
-  ngAfterViewInit() {
+ngAfterViewInit() {
     this.initMap();
-  }
-  
-
- 
+}
   
   initMap() {
     console.log("to inside initmap check",this.latlong);
@@ -445,4 +448,4 @@ interface Inventory {
   available: number;
   surplus: number;
   deficit: number;
-}
+} 
