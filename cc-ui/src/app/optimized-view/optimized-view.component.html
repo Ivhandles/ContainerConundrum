@@ -102,14 +102,19 @@
 
 <ng-container>
   <!-- If finalServiceData has data, display service_name -->
-  <div *ngIf="!loading && hasFinalServiceData" style="textstyles">
-    You can use these Services:
-    <div *ngFor="let serviceData of finalServiceData | keyvalue">
-      <div *ngIf="serviceData.value.length > 0">
-        Service Name: {{ serviceData.value[0]?.serviceName }}
+  <div *ngIf="finalServiceData">
+    <div *ngFor="let serviceId of getFinalServiceDataKeys()">
+      <div *ngIf="finalServiceData[serviceId]?.portSequences.length > 0">
+        You can use this Service Name: {{ finalServiceData[serviceId]?.serviceName }}
       </div>
     </div>
   </div>
+  
+  
+    
+    
+    
+
 
   <!-- If finalServiceData is empty, display "No service" message and "Search Ads" button -->
   <div *ngIf="!loading && !hasFinalServiceData" style="textstyles">
