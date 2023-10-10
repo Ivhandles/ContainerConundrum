@@ -1,0 +1,20 @@
+trigger:
+- namitha
+- '*'
+
+pr:
+- '*'
+
+jobs:
+- job: Build
+  displayName: 'Build and push container image to registry'
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: Docker@2
+    displayName: 'Set up Docker Buildx'
+    inputs:
+      containerRegistry: $(REGISTRY_SOURCE)
+      action: 'Set up Docker Buildx'
+      dockerCli: 'x'
+  - checkout: self
