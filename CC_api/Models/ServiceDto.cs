@@ -6,5 +6,7 @@ namespace CC_api.Models
     public string ServiceName { get; set; }
     public List<PortSequence> PortSequences { get; set; }
 
+  
+
   }
 }

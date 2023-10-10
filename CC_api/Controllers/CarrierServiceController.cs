@@ -69,7 +69,7 @@ namespace CC_api.Controllers
       }
       return NotFound();
     }
-    [HttpGet("GetInternalServicePortSequenceData")]
+    [HttpGet("GetInternalServiceforDeficitPort")]
     public async Task<ActionResult<Dictionary<int, List<PortSequence>>>> GetPortSequenceDataByServiceIdAndPortCode(int companyId, string portCode)
     {
       var portSequenceData = await servicesBusiness.GetPortSequenceDataAsync(companyId, portCode);
@@ -78,6 +78,41 @@ namespace CC_api.Controllers
      
 
     }
+    [HttpGet("GetInternalServicePortSequenceData")]
+    public async Task<ActionResult<Dictionary<int, List<PortSequence>>>> GetInternalServicePortSequenceData(int companyId, string portCode)
+    {
+      var portSequenceData = await servicesBusiness.GetPortSequenceDataAsync(companyId, portCode);
+      return Ok(portSequenceData);
 
+
+
+    }
+
+    [HttpGet("GetSeqNo")]
+    public async Task<IActionResult> GetSeqNo(string portCode)
+    {
+      if (string.IsNullOrEmpty(portCode))
+      {
+        return BadRequest("Port code cannot be empty.");
+      }
+
+      try
+      {
+        var seqNo = await servicesBusiness.GetSeqNoByPortCode(portCode);
+
+        if (seqNo != null)
+        {
+          return Ok(seqNo);
+        }
+        else
+        {
+          return NotFound("Port code not found.");
+        }
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
   }
 }
