@@ -67,14 +67,16 @@ namespace CC_api.Business
 
         // Filter the data for the current service_id and seqNo
         var filteredData = servicePortSequenceData
-            .Where(ps => ps.seq_no == seqNo - 1)
+            .Where(ps => ps.seq_no < seqNo)
             .Select(ps => new PortSequence
             {
               port_id = ps.port_id,
               port_name = ps.port_name,
               port_code = ps.port_code,
-              seq_no = ps.seq_no
+              seq_no = ps.seq_no,
+              service_id = serviceId
             })
+            .OrderByDescending(ps => ps.seq_no) // Sort by seq_no in descending order
             .ToList();
 
         // Add the filtered data to the DTO of the corresponding service
@@ -84,7 +86,12 @@ namespace CC_api.Business
       return portSequenceData;
     }
 
+    public async Task<int?> GetSeqNoByPortCode(string portCode)
+    {
+      // You can add any additional business logic here if needed
 
+      return await serviceRepository.GetSeqNoByPortCode(portCode);
+    }
 
 
 

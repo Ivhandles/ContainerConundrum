@@ -62,9 +62,15 @@ namespace CC_api.Repository
       }
       return null;
     }
-    
 
 
+    public async Task<int?> GetSeqNoByPortCode(string portCode)
+    {
+      var portSequence = await dbContext.port_sequence
+          .FirstOrDefaultAsync(p => p.port_code == portCode);
+
+      return portSequence?.seq_no;
+    }
 
 
 
