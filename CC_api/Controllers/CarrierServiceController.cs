@@ -78,11 +78,11 @@ namespace CC_api.Controllers
      
 
     }
-    [HttpGet("GetInternalServicePortSequenceData")]
-    public async Task<ActionResult<Dictionary<int, List<PortSequence>>>> GetInternalServicePortSequenceData(int companyId, string portCode)
+    [HttpGet("GetInternalServiceforSurplusPort")]
+    public async Task<ActionResult<Dictionary<int, List<PortSequence>>>> GetInternalServiceforSurplusPort(int companyId, string portCode)
     {
-      var portSequenceData = await servicesBusiness.GetPortSequenceDataAsync(companyId, portCode);
-      return Ok(portSequenceData);
+      var surplusSequenceData = await servicesBusiness.GetInternalServiceforSurplusPort(companyId, portCode);
+      return Ok(surplusSequenceData);
 
 
 

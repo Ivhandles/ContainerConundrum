@@ -85,7 +85,60 @@ namespace CC_api.Business
 
       return portSequenceData;
     }
+    public async Task<Dictionary<int, ServiceDto>> GetInternalServiceforSurplusPort(int companyId, string portCode)
+    {
+      var services = await serviceRepository.GetAllServicesByCompanyId(companyId);
 
+      // Filter services to include only those with the matching portCode
+      services = services.Where(service => serviceRepository.GetPortSequenceDataByServiceIdAsync(service.service_id).Result
+          .Any(ps => ps.port_code == portCode))
+          .ToList();
+
+      List<int> portcodesseqNos = await serviceRepository.GetSeqNosFromPortCodeAsync(portCode);
+      Console.WriteLine("Seq Nos: " + string.Join(", ", portcodesseqNos));
+
+      var surplusSequenceData = new Dictionary<int, ServiceDto>();
+
+      // Iterate through each service and initialize the DTO
+      foreach (var service in services)
+      {
+        var servicePortSequenceDTO = new ServiceDto
+        {
+          ServiceName = await serviceRepository.GetServiceNameByIdAsync(service.service_id),
+          PortSequences = new List<PortSequence>()
+        };
+
+        surplusSequenceData[service.service_id] = servicePortSequenceDTO;
+      }
+
+      // Iterate through each portcodesseqNo and corresponding service_id
+      for (int i = 0; i < portcodesseqNos.Count; i++)
+      {
+        var seqNo = portcodesseqNos[i];
+        var serviceId = services[i].service_id;
+
+        var servicePortSequenceData = await serviceRepository.GetPortSequenceDataByServiceIdAsync(serviceId);
+
+        // Filter the data for the current service_id and seqNo
+        var filteredData = servicePortSequenceData
+        .Where(ps => ps.seq_no > seqNo)
+        .Select(ps => new PortSequence
+        {
+          port_id = ps.port_id,
+          port_name = ps.port_name,
+          port_code = ps.port_code,
+          seq_no = ps.seq_no,
+          service_id = serviceId
+        })
+        .ToList();
+
+
+        // Add the filtered data to the DTO of the corresponding service
+        surplusSequenceData[serviceId].PortSequences.AddRange(filteredData);
+      }
+
+      return surplusSequenceData;
+    }
     public async Task<int?> GetSeqNoByPortCode(string portCode)
     {
       // You can add any additional business logic here if needed
