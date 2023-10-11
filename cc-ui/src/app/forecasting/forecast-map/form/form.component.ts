@@ -470,22 +470,43 @@ async updateDeficitCount(portCode: any, deifcitcontainerType: any, deficitcontai
 onOptimizedViewButtonClick() {
   debugger;
   if (this.isOptimizedViewEnabled()) {
-    // Set the values in a single call to sharedservice.setisvalues
-    this.sharedservice.setisvalues({
-      portCode: this.portCode,
-      containerType: this.deifcitcontainerType, // Set your desired values here
-      containerSize: this.deficitcontainerSize, // Set your desired values here
-      latitude: this.portlatitude, // Set your desired latitude value
-      longitude: this.portlongitude, // Set your desired longitude value
-    });
-    console.log("from form to ov",this.portCode);
-    console.log("from form to ov",this.deifcitcontainerType);
-    console.log("from form to ov",this.deficitcontainerSize);
-    console.log("from form to ov",this.portlatitude);
-    console.log("from form to ov",this.portlongitude);
+    if (this.deifcitcontainerType && this.deficitcontainerSize) {
+      // Set values for deficit
+      this.sharedservice.setisvaluesfordeficit({
+        portCode: this.portCode,
+        containerType: this.deifcitcontainerType,
+        containerSize: this.deficitcontainerSize,
+        latitude: this.portlatitude,
+        longitude: this.portlongitude,
+      });
+          // Logging the values (for both cases)
+    console.log("from form to ov for deficit", this.portCode);
+    console.log("from form to ov for deficit", this.deifcitcontainerType);
+    console.log("from form to ov for deficit", this.deficitcontainerSize);
+    console.log("from form to ov for deficit", this.portlatitude);
+    console.log("from form to ov for deficit", this.portlongitude);
+    } else if (this.surpluscontainerType && this.surpluscontainerSize) {
+      debugger
+      // Set values for surplus
+      this.sharedservice.setisvaluesforsurplus({
+        surplusportCode: this.portCode,
+        surpluscontainerType: this.surpluscontainerType,
+        surpluscontainerSize: this.surpluscontainerSize,
+        surpluslatitude: this.portlatitude, // Set your desired latitude value
+        surpluslongitude: this.portlongitude, // Set your desired longitude value
+      });
+    }
+    
 
+
+    console.log("from form to ov for surplus", this.portCode);
+    console.log("from form to ov for surplus", this.surpluscontainerType);
+    console.log("from form to ov for surplus", this.surpluscontainerSize);
+    console.log("from form to ov for surplus", this.portlatitude);
+    console.log("from form to ov for surplus", this.portlongitude);
   }
 }
+
 
 
 

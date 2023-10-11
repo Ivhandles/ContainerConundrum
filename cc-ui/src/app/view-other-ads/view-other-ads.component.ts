@@ -173,9 +173,9 @@ selectedMainOption: string = ''; // To store the selected main option
   }
   ngOnInit(): void {
     this.sharedService.values$.subscribe(values => {
-      this.receivedportCode = values.portCode;
-      this.receivedcontainerType = values.containerType;
-      this.receivedcontainerSize = parseInt(values.containerSize, 10);
+      this.receivedportCode = values.portcode;
+      this.receivedcontainerType = values.containertype;
+      this.receivedcontainerSize = parseInt(values.containersize, 10);
       
     });
     console.log( "to check",this.receivedportCode)
