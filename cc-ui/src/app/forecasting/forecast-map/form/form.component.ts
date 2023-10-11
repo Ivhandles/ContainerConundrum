@@ -7,6 +7,7 @@ import { PostAdComponent } from 'src/app/my-advertisement/post-ad/post-ad.compon
 import { MatSnackBar, MatSnackBarConfig, MatSnackBarRef } from '@angular/material/snack-bar';
 import { PostAdService } from 'src/app/my-advertisement/post-ad/post-ad.service';
 import { SharedServiceService } from 'src/app/shared-service.service';
+import { map, zip } from 'rxjs';
 
 @Component({
   selector: 'app-form',
@@ -34,7 +35,7 @@ PortName: string = '';
   deficit_Size:any
   surpluscontainerType:any;
   deifcitcontainerType:any;
-  deficitcontainerSize:number | null = null;
+  deficitcontainerSize:any;
   operation:any;
   from_date:any;
   expiry_date:any;
@@ -469,19 +470,23 @@ async updateDeficitCount(portCode: any, deifcitcontainerType: any, deficitcontai
 onOptimizedViewButtonClick() {
   debugger;
   if (this.isOptimizedViewEnabled()) {
-    const port_code = this.portCode;
-    const container_type = this.deifcitcontainerType; // Corrected variable name
-    const container_size = this.deficitcontainerSize;
-    this.sharedservice.setData(port_code, container_type, container_size);
+    // Set the values in a single call to sharedservice.setisvalues
+    this.sharedservice.setisvalues({
+      portCode: this.portCode,
+      containerType: this.deifcitcontainerType, // Set your desired values here
+      containerSize: this.deficitcontainerSize, // Set your desired values here
+      latitude: this.portlatitude, // Set your desired latitude value
+      longitude: this.portlongitude, // Set your desired longitude value
+    });
+    console.log("from form to ov",this.portCode);
+    console.log("from form to ov",this.deifcitcontainerType);
+    console.log("from form to ov",this.deficitcontainerSize);
+    console.log("from form to ov",this.portlatitude);
+    console.log("from form to ov",this.portlongitude);
 
-    const port_latitude = this.portlatitude;
-    const port_longitude = this.portlongitude; // Corrected variable name
-    this.sharedservice.setlatitudelongitude(port_latitude, port_longitude);
-  
-
-    
   }
 }
+
 
 
 
