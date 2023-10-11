@@ -4,7 +4,7 @@ import { ForecastingTableService } from '../forecasting/forecasting-table-view/f
 import * as XLSX from 'xlsx';
 import { SharedServiceService } from '../shared-service.service';
 import { distinctUntilChanged, filter, map, mergeMap, switchMap, takeUntil } from 'rxjs/operators';
-import { Subject, Subscription, combineLatest, forkJoin, of } from 'rxjs';
+import { Subject, Subscription, combineLatest, forkJoin, of, zip } from 'rxjs';
 import { CarrierServiceService } from '../carrier-service/carrier-service.service';
 
 @Component({
@@ -60,79 +60,29 @@ export class OptimizedViewComponent implements OnInit, AfterViewInit {
  
 
   ngOnInit(): void {
-  
-
-   
-   
-   
-  
     this.loadInitialData();
-    let latitudeReceived = false;
-    let longitudeReceived = false;
-    let initMapCalled = false;
-    
-    this.latitudeSubscription = this.sharedService.PortLatitude$.subscribe((latitude: number) => {
-      // Handle latitude updates here
-      this.latitude = latitude;
-      latitudeReceived = true;
-    
-      // Check if both latitude and longitude have been received
-      if (latitudeReceived && longitudeReceived && !initMapCalled) {
-        this.initMap();
-        initMapCalled = true;
-      }
+    this.sharedService.valuesforis$.subscribe(values => {
+      this.receivedportCode = values.portCode;
+      this.receivedcontainerType = values.containerType;
+      this.receivedcontainerSize = values.containerSize;
+      this.latitude = values.latitude;
+      this.longitude = values.longitude;
+      
     });
-    
-    this.longitudeSubscription = this.sharedService.PortLongitude$.subscribe((longitude: number) => {
-      // Handle longitude updates here
-      this.longitude = longitude;
-      longitudeReceived = true;
-    
-      // Check if both latitude and longitude have been received
-      if (latitudeReceived && longitudeReceived && !initMapCalled) {
-        this.initMap();
-        initMapCalled = true;
-      }
-    });
-    
-    
-  
-    
-   
-    combineLatest([
-      this.sharedService.selected_port,
-      this.sharedService.selectedContainerType$,
-      this.sharedService.selectedContainerSize$,
-    ])
-    .pipe(
-      filter(([portCode, containerType, containerSize]) => 
-        portCode !== undefined && containerType !== undefined && containerSize !== undefined
-      )
-    )
-    .subscribe(([portCode, containerType, containerSize]) => {
-      // Assign the values
-      debugger
-      this.receivedportCode = portCode;
-      this.receivedcontainerType = containerType;
-      this.receivedcontainerSize = containerSize;
-    
-      this.portCodeReceived = true;
-      this.containerTypeReceived = true;
-      this.containerSizeReceived = true;
-    
-      // Check if all values are received before calling filterData
-      if (
-        this.portCodeReceived &&
-        this.containerTypeReceived &&
-        this.containerSizeReceived
-      ) {
-        this.filterData(this.receivedportCode, this.receivedcontainerType, this.receivedcontainerSize);
-      }
-    });
+console.log("Received values in ov",this.receivedportCode);
+console.log("Received values in ov",this.receivedcontainerType);
+console.log("Received values in ov",this.receivedcontainerSize);
+console.log("Received values in ov",this.latitude);
+console.log("Received values in ov",this.longitude);
 
+   
+   
+   
+  
     
    
   }
+
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
