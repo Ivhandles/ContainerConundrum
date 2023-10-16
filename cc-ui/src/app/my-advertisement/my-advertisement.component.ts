@@ -158,6 +158,7 @@ pickup_charges:any;
 
 
   ngOnInit(): void {
+  
     this.ad_type = 'container'; // Set initial ad_type to 'container'
     this.operation = 'Active'; // Set initial operation to 'Active'
     this.showContainerSection = true; // Show the container section by default
@@ -165,6 +166,8 @@ pickup_charges:any;
     if (this.isFirstTime) {
       this.isFirstTime = false;
     }
+
+    debugger
     this.route.queryParams.subscribe(params => {
       this.ad_type = params['type'] || 'container'; // Default to 'container'
     });
@@ -546,6 +549,7 @@ adTypeChanged(type: string) {
   }
   
 viewAds() {
+ debugger   
   this.myadservice.getAdsById(this.companyId, this.operation, this.ad_type).subscribe(
     (data: Advertisement[]) => {
       this.ads = data;
