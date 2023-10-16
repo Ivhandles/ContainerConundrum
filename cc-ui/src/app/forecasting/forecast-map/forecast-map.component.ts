@@ -36,6 +36,10 @@ totalDeficitPercentage: number = 0;
   }
   
   ngOnInit(): void {
+    window.addEventListener('popstate', () => {
+      this.reloadMap();
+    });
+  
     this.sessionService.getCompanyId().subscribe(
       (companyId: number) => {
 
@@ -56,6 +60,9 @@ totalDeficitPercentage: number = 0;
       }
     );
 
+  }
+  reloadMap() {
+    window.location.reload();
   }
   options = ['Map', 'Table', 'Surplus Area','Deficit Area'];
   selectedOption = 0;
