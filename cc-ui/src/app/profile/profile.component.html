@@ -14,7 +14,7 @@
             <div class=" flex flex-row items-center w-full">
               <div class="relative px-1 py-2" id="company-logo">
                 <img class="bg-img object-contain overflow-hidden w-16 h-14 rounded-full border-1 border-transparent outline-2" src="{{ company_logo }}" />
-                <button (click)="showDiv = !showDiv" matTooltip="Edit Company Profile" class="absolute bottom-1 right-0 cursor-pointer">
+                <button (click)="showDiv = !showDiv"  [disabled]="isEditcompanyDisabled" [class.disabled-button]="isEditcompanyDisabled "matTooltip="Edit Company Profile" class="absolute bottom-1 right-0 cursor-pointer">
                   <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect width="16" height="16" transform="translate(0.5)" fill="white" style="mix-blend-mode:multiply"/>
                     <path d="M15.5 13H1.5V14H15.5V13Z" fill="#597EF7"/>
@@ -202,7 +202,9 @@
           Sync Data
         </button>
         <div class="button-container relative inline-block">
-          <button class="div-action-button" routerLink="/upload-contract" matTooltip="Upload Contract">
+          <button class="div-action-button" 
+          [disabled]="isUploadcontractsDisabled" [class.disabled-button]="isUploadcontractsDisabled"
+          routerLink="/upload-contract" matTooltip="Upload Contract">
             Upload Contracts
           </button>
           <div class="dropdown flex flex-col">
@@ -215,7 +217,9 @@
         </div>
         </div>
 
-        <button class="div-action-button ml-2" routerLink="/upload-inventory" matTooltip="Upload Inventory">
+        <button class="div-action-button ml-2"
+        [disabled]="isAddInventoryDisabled" [class.disabled-button]="isAddInventoryDisabled"
+        routerLink="/upload-inventory" matTooltip="Upload Inventory">
           Upload Inventory
         </button>
 
@@ -247,6 +251,7 @@
      
       <button color="primary"
       class="btn-primary1 text-white h-[14em]  py-3 rounded-none px-2 mr-4  font-light  ml-auto  justify-end w-fit" matTooltip="Add User"
+      [disabled]="isAddUserDisabled" [class.disabled-button]="isAddUserDisabled"
       (click)="DisplayPostForm()">+ Add User</button>
 
   </div>
