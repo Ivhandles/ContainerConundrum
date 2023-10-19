@@ -1,5 +1,5 @@
 import { Component,Inject, OnInit, Output,EventEmitter  } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Registerservice } from './register.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -78,7 +78,7 @@ ngOnInit(): void {
     last_name: ['', [Validators.required, Validators.pattern('[a-zA-Z ]*'), Validators.maxLength(20)]],
     address: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(25)]],
-    phone_no:['', [Validators.pattern('[0-9]*'), Validators.maxLength(15)]],
+    phone_no: ['', [Validators.required, this.validPhoneNumber()]],
     password: ['', [Validators.required, Validators.minLength(8), Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$'), Validators.maxLength(15)]],
     city:['', [Validators.pattern('[a-zA-Z ]*'), Validators.maxLength(10)]],
     otp:['123456',Validators.required],
@@ -101,6 +101,17 @@ ngOnInit(): void {
     }
   );
 
+}
+validPhoneNumber(): ValidatorFn {
+  return (control: AbstractControl): { [key: string]: any } | null => {
+    const phoneNumberPattern = /^[0-9]+$/; // Regular expression to allow only numbers
+
+    if (control.value && !phoneNumberPattern.test(control.value)) {
+      return { invalidPhoneNumber: true };
+    }
+
+    return null;
+  };
 }
 onCompanyNameChange(event: Event) {
   // Explicitly specify the event type as 'Event' and then access the 'value' property of the target element.
