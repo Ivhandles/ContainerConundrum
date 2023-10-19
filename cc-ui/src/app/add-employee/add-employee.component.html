@@ -69,10 +69,20 @@
           placeholder="E.g. +918707312194"
           name="phone_no"
         />
+        <div *ngIf="addEmployeeForm.get('phone_no')?.errors?.['invalidPhoneNumber'] && addEmployeeForm.get('phone_no')?.dirty" class="text-red-500 text-sm">
+          Enter valid phone number
+        </div>
         <div *ngIf="showValidationErrors && addEmployeeForm.get('phone_no')?.invalid" class="text-red-500 text-sm mt-1"></div>
         <div class="error" *ngIf="addEmployeeForm?.get('phone_no')?.invalid && addEmployeeForm?.get('phone_no')?.errors?.['maxlength']">
           Maximum limit exceeded.
         </div>
+      
+        
+        
+        
+        
+        
+        
       </div>
       
       
