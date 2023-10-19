@@ -274,29 +274,31 @@
           </button>
           
 </div>
-  <div *ngIf="selectedView === 'MAP' && showMapView && ad_type === 'container'" class="map-view">
-    <app-view-other-ads-map-view
-      [ad_typetomap]="ad_typetomap"
-      [typetomap]="typetomap"
-      [selectedTypePortOfAd]="selectedTypePortOfAd"
-      [selectedcontainertypetomap]="selectedcontainertypetomap"
-      [selectedcontainersizetomap]="selectedcontainersizetomap"
+<div *ngIf="selectedView === 'MAP' && showMapView && ad_type === 'container'" class="map-view">
+  <app-view-other-ads-map-view
+    [ad_typetomap]="ad_typetomap"
+    [typetomap]="typetomap"
+    [selectedTypePortOfAd]="selectedTypePortOfAd"
+    [selectedTypePortOfDep]="selectedTypePortOfDep"
+    [selectedTypePortOfArr]="selectedTypePortOfArr"
+    [selectedcontainertypetomap]="selectedcontainertypetomap"
+    [selectedcontainersizetomap]="selectedcontainersizetomap"
 
-      
-    ></app-view-other-ads-map-view>
-  </div>
-  <div *ngIf="selectedView === 'MAP' && showMapView && ad_type === 'space'" class="map-view">
-    <app-view-other-ads-map-view
-      [ad_typetomap]="ad_typetomap"
-      [typetomap]="typetomap"
-      [selectedTypePortOfDep]="selectedTypePortOfDep"
-      [selectedTypePortOfArr]="selectedTypePortOfArr"
-      [selectedcontainertypetomap]="selectedcontainertypetomap"
-      [selectedcontainersizetomap]="selectedcontainersizetomap"
+    
+  ></app-view-other-ads-map-view>
+</div>
+<div *ngIf="selectedView === 'MAP' && showMapView && ad_type === 'space'" class="map-view">
+  <app-view-other-ads-map-view
+    [ad_typetomap]="ad_typetomap"
+    [typetomap]="typetomap"
+    [selectedTypePortOfDep]="selectedTypePortOfDep"
+    [selectedTypePortOfArr]="selectedTypePortOfArr"
+    [selectedcontainertypetomap]="selectedcontainertypetomap"
+    [selectedcontainersizetomap]="selectedcontainersizetomap"
 
-      
-    ></app-view-other-ads-map-view>
-  </div>
+    
+  ></app-view-other-ads-map-view>
+</div>
  
   <div *ngIf="!showMapView"   >
     <mat-progress-bar mode="buffer" *ngIf="isLoading"></mat-progress-bar>
