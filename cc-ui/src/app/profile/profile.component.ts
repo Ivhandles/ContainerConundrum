@@ -59,6 +59,8 @@ export class ProfileComponent implements OnInit {
   isAddInventoryDisabled:boolean = false;
   isUploadcontractsDisabled:boolean = false;
   isEditcompanyDisabled:boolean = false;
+  isEditEmployeeDisabled: boolean = false;
+  isDeleteEmployeeDisabled: boolean=false;
   //for pagination
   get totalPages(): number {
     return Math.ceil(this.filteredUsers.length / this.itemsPerPage);
@@ -229,7 +231,7 @@ export class ProfileComponent implements OnInit {
     this.sessionService.getUserDesignation().subscribe(
       (userDesignation: string) => {
         this.userDesignation = userDesignation;
-        console.log('User des is :', userDesignation);
+        console.log('User des is :', this.userDesignation);
       },
       (error: any) => {
         console.error('Error retrieving user des:', error);
@@ -242,6 +244,8 @@ export class ProfileComponent implements OnInit {
         this.isAddInventoryDisabled = !(this.UserPList.includes(16) || this.userDesignation ==='admin');
         this.isUploadcontractsDisabled =!(this.UserPList.includes(18) || this.userDesignation ==='admin');
         this.isEditcompanyDisabled =!(this.UserPList.includes(18) || this.userDesignation ==='admin');
+        this.isEditEmployeeDisabled = !(this.UserPList.includes(14) || this.userDesignation ==='admin');
+        this.isDeleteEmployeeDisabled = !(this.UserPList.includes(12) || this.userDesignation ==='admin');
        console.log("User permissions",this.UserPList);
       },
       (error: any) => {
@@ -396,7 +400,11 @@ export class ProfileComponent implements OnInit {
 
   
 
-   
+  capitalizeFirstLetter(text: string): string {
+    if (!text) return text;
+  
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
   
 
 }
