@@ -318,6 +318,7 @@ this.type=this.data.type;
       'Close',
       snackBarConfig
     );
+    
   }
   // closeDialog() {
   //   this.dialogRef.close();
@@ -350,7 +351,7 @@ capitalizeFirstLetter(text: string): string {
           this.statusMsg = 'Success';
           setTimeout(()=> {this.statusMsg = ""},2000)
           this.clear()
-
+          window.location.reload();
           this.router.navigate(['/my-ad']); 
          
           this.isLoading=false;
@@ -363,6 +364,7 @@ capitalizeFirstLetter(text: string): string {
           
         }
       });
+      
     }
     else{
       alert("Please Fill the Mandatory Fields")
