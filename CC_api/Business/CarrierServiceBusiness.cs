@@ -36,17 +36,21 @@ namespace CC_api.Business
       var services = await serviceRepository.GetAllServicesByCompanyId(companyId);
 
       // Filter services to include only those with the matching portCode
-      services = services.Where(service => serviceRepository.GetPortSequenceDataByServiceIdAsync(service.service_id).Result
+     var Services = services.Where(service => serviceRepository.GetPortSequenceDataByServiceIdAsync(service.service_id).Result
           .Any(ps => ps.port_code == portCode))
           .ToList();
+      List<int> portcodesseqNos = new List<int>();
 
-      List<int> portcodesseqNos = await serviceRepository.GetSeqNosFromPortCodeAsync(portCode);
-      Console.WriteLine("Seq Nos: " + string.Join(", ", portcodesseqNos));
+      foreach (var service in Services)
+      {
+        var seqNos = await serviceRepository.GetSeqNosFromPortCodeAsync(portCode, service.service_id);
+        portcodesseqNos.AddRange(seqNos);
+      }
 
       var portSequenceData = new Dictionary<int, ServiceDto>();
 
       // Iterate through each service and initialize the DTO
-      foreach (var service in services)
+      foreach (var service in Services)
       {
         var servicePortSequenceDTO = new ServiceDto
         {
@@ -61,7 +65,7 @@ namespace CC_api.Business
       for (int i = 0; i < portcodesseqNos.Count; i++)
       {
         var seqNo = portcodesseqNos[i];
-        var serviceId = services[i].service_id;
+        var serviceId = Services[i].service_id;
 
         var servicePortSequenceData = await serviceRepository.GetPortSequenceDataByServiceIdAsync(serviceId);
 
@@ -90,17 +94,21 @@ namespace CC_api.Business
       var services = await serviceRepository.GetAllServicesByCompanyId(companyId);
 
       // Filter services to include only those with the matching portCode
-      services = services.Where(service => serviceRepository.GetPortSequenceDataByServiceIdAsync(service.service_id).Result
+      var Services = services.Where(service => serviceRepository.GetPortSequenceDataByServiceIdAsync(service.service_id).Result
           .Any(ps => ps.port_code == portCode))
           .ToList();
+      List<int> portcodesseqNos = new List<int>();
 
-      List<int> portcodesseqNos = await serviceRepository.GetSeqNosFromPortCodeAsync(portCode);
-      Console.WriteLine("Seq Nos: " + string.Join(", ", portcodesseqNos));
+      foreach (var service in Services)
+      {
+        var seqNos = await serviceRepository.GetSeqNosFromPortCodeAsync(portCode, service.service_id);
+        portcodesseqNos.AddRange(seqNos);
+      }
 
       var surplusSequenceData = new Dictionary<int, ServiceDto>();
 
       // Iterate through each service and initialize the DTO
-      foreach (var service in services)
+      foreach (var service in Services)
       {
         var servicePortSequenceDTO = new ServiceDto
         {
@@ -115,7 +123,7 @@ namespace CC_api.Business
       for (int i = 0; i < portcodesseqNos.Count; i++)
       {
         var seqNo = portcodesseqNos[i];
-        var serviceId = services[i].service_id;
+        var serviceId = Services[i].service_id;
 
         var servicePortSequenceData = await serviceRepository.GetPortSequenceDataByServiceIdAsync(serviceId);
 

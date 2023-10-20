@@ -25,13 +25,13 @@ namespace CC_api.Repository
       // Implement the logic to fetch port sequence data by serviceId from the database.
       return await dbContext.port_sequence.Where(ps => ps.service_id == serviceId).ToListAsync();
     }
- 
-    public async Task<List<int>> GetSeqNosFromPortCodeAsync(string portCode)
+
+    public async Task<List<int>> GetSeqNosFromPortCodeAsync(string portCode, int serviceId)
     {
-      // Query your database to fetch all seq_no values based on the portCode
+      // Query your database to fetch all seq_no values based on the portCode and serviceId
       // Replace this with the actual database query using your data access technology (e.g., Entity Framework, Dapper, etc.)
       var queryResults = await dbContext.port_sequence
-          .Where(ps => ps.port_code == portCode)
+          .Where(ps => ps.port_code == portCode && ps.service_id == serviceId)
           .Select(ps => ps.seq_no)
           .ToListAsync();
 
@@ -42,6 +42,7 @@ namespace CC_api.Repository
       }
       return new List<int>();
     }
+
     public async Task<string> GetServiceNameByIdAsync(int serviceId)
     {
       var serviceName = await dbContext.carrier_service
