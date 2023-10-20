@@ -33,5 +33,10 @@ namespace CC_api.Business
     {
       return await portsRepository.GetPortidbyCode(portcode);
     }
+    public async Task<Ports> GetByPortId(int portId)
+    {
+      var port = await portsRepository.GetByPortId(portId);
+      return port;
+    }
   }
 }

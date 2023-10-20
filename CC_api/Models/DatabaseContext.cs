@@ -21,6 +21,9 @@ namespace CC_api.Models
     public DbSet<Conversation> conversation { get; set; }
     public DbSet<Message> message { get; set; }
     public DbSet<Participant> participant { get; set; }
+    public DbSet<CarrierService> carrier_service { get; set; }
+
+    public DbSet<PortSequence> port_sequence { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -28,6 +31,7 @@ namespace CC_api.Models
       //if (!optionsBuilder.IsConfigured)
       optionsBuilder.UseNpgsql("User ID=citus;Password=ivoyant@14;Host=ivoyant-datamapper.postgres.database.azure.com;Port=5432;Database=container-conundrum;Pooling=true;");
     }
+
   }
 
 }

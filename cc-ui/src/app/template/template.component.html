@@ -8,7 +8,7 @@
   <div class="container-d">
     <!--left sidebar view-->
     <div class="left-section">
-      <app-sidebar class="min-h-screen w-[150px]"></app-sidebar>
+      <app-sidebar class="min-h-screen w-[100px]"></app-sidebar>
     </div>
    
     <!--right view-->
@@ -30,6 +30,9 @@
     <div class="right-section" *ngIf="isActive('/forecasting-table-view')">
       <app-forecasting-table-view></app-forecasting-table-view>
     </div>
+    <div class="right-section" *ngIf="isActive('/optimized-view')">
+      <app-optimized-view></app-optimized-view>
+    </div>
     <div class="right-section" *ngIf="isActive('/my-ad')">
       <app-my-advertisement></app-my-advertisement>
     </div>
@@ -45,6 +48,12 @@
     </div>
     <div class="right-section" *ngIf="isActive('/messaging')">
       <app-messaging></app-messaging>
+    </div>
+    <div class="right-section"  *ngIf="isActive('/carrier-service')">
+      <app-carrier-service></app-carrier-service>
+    </div>
+    <div class="right-section"  *ngIf="isActive('/route-service')">
+      <app-service-route></app-service-route>
     </div>
     <!-- <div class="right-section" *ngIf="isActive('/forecasting')">
     <app-forecasting></app-forecasting>

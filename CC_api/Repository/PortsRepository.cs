@@ -28,6 +28,11 @@ namespace CC_api.Repository
 
       return port?.port_id ?? 0;
     }
+    public async Task<Ports> GetByPortId(int portId)
+    {
+      var port = dbContext.ports.FirstOrDefault(p => p.port_id == portId);
+      return port;
+    }
   }
 }
 

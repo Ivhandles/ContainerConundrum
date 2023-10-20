@@ -1,13 +1,13 @@
 import { Component, OnInit,Input, Inject} from '@angular/core';
 import { Select, initTE } from "tw-elements";
 import { FormGroup } from '@angular/forms';
-
+import { MatDialog } from '@angular/material/dialog';
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import * as XLSX from 'xlsx'
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, Routes } from '@angular/router';
 
 import { filter, map } from 'rxjs';
 import { NumberSymbol } from '@angular/common';
@@ -32,6 +32,7 @@ export interface Containers {
   styleUrls: ['./post-ad.component.css']
 })
 export class PostAdComponent implements OnInit{
+ 
   ContinueDraft:any;
   adId:any;
   contractForm!: FormGroup;
@@ -82,12 +83,20 @@ port_of_ad:any;
 pickup_charges:any;
 public isButtonDisabled: boolean = false;
 Approve: any;
+  containerSize: any;
 
 
 
   constructor(@Inject(MAT_DIALOG_DATA)public data:any,private snackBar: MatSnackBar, private ref:MatDialogRef<PostAdComponent>,private postAdService: PostAdService,private router:Router,private sessionService: SessionService,private viewotherads:ViewOtherAdsService) {
+    this.container_type = data.containerType;
+    this.size = data.containerSize;
+    this.port_of_ad = data.portName;
+    this.port_id = data.port_id;
+ console.log("in post ad",this.port_of_ad)
+ console.log("in post ad port_id",this.port_id)
   }
 
+  
   addExcel(): void {
 
     if(this.y==1){
@@ -310,7 +319,9 @@ this.type=this.data.type;
       snackBarConfig
     );
   }
-
+  // closeDialog() {
+  //   this.dialogRef.close();
+  // }
  getWeekDifference(from_date: Date, expiry_date: Date): number {
   const millisecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
   const differenceInMilliseconds = expiry_date.getTime() - from_date.getTime();
@@ -318,14 +329,18 @@ this.type=this.data.type;
   console.log("expiry date calculated is"+differenceInWeeks);
   return differenceInWeeks;
 }
+capitalizeFirstLetter(text: string): string {
+  if (!text) return text;
 
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
   
   async onPost() {
     debugger
     this.isLoading=true;
   if(this.operation=="PostAd"){
     
-    if (this.from_date && this.expiry_date && this.type_of_ad && this.price && this.file && this.container_type && this.size && this.type_of_ad) {
+    if (this.from_date && this.expiry_date && this.type_of_ad && this.price && this.file && this.container_type && this.size && this.type_of_ad ) {
 
     debugger
       this.postAdService.uploadFile(this.file,this.from_date,this.expiry_date,this.type_of_ad,this.container_type,this.size,this.price,this.quantity,this.port_id, this.userId, this.companyId, this.contents,this.port_of_departure,this.port_of_arrival,this.free_days,this.per_diem,this.pickup_charges,this.operation,this.port_of_ad,this.type).subscribe((response: any) => {
@@ -336,19 +351,23 @@ this.type=this.data.type;
           setTimeout(()=> {this.statusMsg = ""},2000)
           this.clear()
 
-          window.location.reload()
+          this.router.navigate(['/my-ad']); 
+         
           this.isLoading=false;
+          this.closeDialog();
 
         } else {
           this.statusMsg = 'Failed';
           console.log(response.status);
           this.isLoading=false;
+          
         }
       });
     }
     else{
       alert("Please Fill the Mandatory Fields")
       this.isLoading=false;
+      
     }
   }
 
@@ -364,10 +383,13 @@ this.type=this.data.type;
          this.statusMsg = 'Success';
          setTimeout(()=> {this.statusMsg = ""},2000)
          this.clear()
-         window.location.reload()
+          this.router.navigate(['/my-ad']); 
+          this.closeDialog();
+         
        } else {
          this.statusMsg = 'Failed';
          console.log(response.status) ;
+         
        }
      });
      this.isLoading=false;
@@ -379,6 +401,9 @@ this.type=this.data.type;
 
   }
     
+  }
+  closeDialog() {
+    this.ref.close();
   }
 
   continueDraft(ad_id: number){

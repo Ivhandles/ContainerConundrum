@@ -29,9 +29,9 @@ export class ViewOtherAdsMapViewComponent implements OnInit {
   @Input()selectedcontainertypetomap:any;
   @Input()selectedcontainersizetomap:any;
   ads: Advertisement[] = [];
-  userOS: any;
+ 
   companyId: any;
-  mapId: string = '2b03aff8b2fb72a3'; // Replace with your Map ID
+  mapId: string = '2b03aff8b2fb72a3'; 
   ports: Port[] = [];
   map: google.maps.Map | undefined;
   markers: google.maps.Marker[] = [];
@@ -40,22 +40,26 @@ export class ViewOtherAdsMapViewComponent implements OnInit {
   ad_type: any;
 
   constructor(private forecastService: ForecastingService,private sessionService: SessionService, private adsService: ViewOtherAdsService) {
-    this.userOS = navigator.platform;
+  
     
   }
 
   ngOnInit(): void {
-    console.log("dh", this.userOS);
+  
     this.getAllPorts();
    
    
   }
-
-  ngOnChanges(): void {
+  ngAfterViewInit(): void {
     this.loadMap();
-    this.getAdvertisement(); // Call getAdvertisement() whenever the inputs change
-   
-    console.log("'selectedTypePortOfAd:'",this.selectedTypePortOfAd);
+  }
+  ngOnChanges(): void {
+    // Update the map when inputs change
+    if (this.map) {
+      this.loadMap();
+    }
+    this.getAdvertisement();
+    console.log("'selectedTypePortOfAd:'", this.selectedTypePortOfAd);
   }
   
   getAdvertisement() {
@@ -96,6 +100,7 @@ export class ViewOtherAdsMapViewComponent implements OnInit {
     debugger
     this.adsService.getAdvertisement(this.ad_typetomap, this.companyId).subscribe(
       (adsdata: Advertisement[]) => {
+        debugger
         this.ads = adsdata;
         console.log("From map view", this.ads);
       },
@@ -112,13 +117,15 @@ export class ViewOtherAdsMapViewComponent implements OnInit {
         this.ports = data;
         console.log(JSON.stringify(this.ports));
   
-        this.loadMap(); // Move the loadMap() call here
+        // Initialize the map here
+        this.loadMap();
       },
       (error: any) => {
         console.error('Error fetching port details:', error);
       }
     );
   }
+  
   
   loadMap() {
     debugger
@@ -137,11 +144,14 @@ export class ViewOtherAdsMapViewComponent implements OnInit {
       mapOptions
     );
   
-    console.log('map:', this.map);
   
-    if (this.ad_typetomap === 'container') {
+  debugger
+    if (this.ad_typetomap === 'container'&&this.typetomap==='oneway') {
+      this.markPortOfDepArrOnMap();
+    } else if (this.ad_typetomap === 'container') {
       this.markPortOfAdOnMap();
-    } else if (this.ad_typetomap === 'space') {
+    }
+    else if(this.ad_typetomap === 'space'){
       this.markPortOfDepArrOnMap();
     }
   }
@@ -163,16 +173,18 @@ export class ViewOtherAdsMapViewComponent implements OnInit {
     return null;
   }
   markPortOfAdOnMap(): void {
+    debugger
     if (!this.map || !this.typetomap || !this.selectedTypePortOfAd || !this.selectedcontainertypetomap || !this.selectedcontainersizetomap) {
       return;
     }
   
     const bounds = new google.maps.LatLngBounds();
     const matchingAds = [];
-  
+  debugger
     // Find ads with matching port_of_ad, container_type, and container_size
     for (const ad of this.ads) {
       if (
+        ad.type_of_ad == this.typetomap&&
         ad.port_of_ad === this.selectedTypePortOfAd &&
         ad.container_type === this.selectedcontainertypetomap &&
         ad.container_size === this.selectedcontainersizetomap
@@ -228,16 +240,18 @@ export class ViewOtherAdsMapViewComponent implements OnInit {
   
   
   markPortOfDepArrOnMap(): void {
+    debugger
     if (!this.map ||!this.typetomap|| !this.selectedTypePortOfDep || !this.selectedTypePortOfArr || !this.selectedcontainertypetomap || !this.selectedcontainersizetomap) {
       return;
     }
   
     const bounds = new google.maps.LatLngBounds();
     const matchingAds = [];
-  
+  debugger
     // Find ads with matching port_of_departure, port_of_arrival, container_type, and container_size
     for (const ad of this.ads) {
       if (
+        ad.type_of_ad === this.typetomap &&
         ad.port_of_departure === this.selectedTypePortOfDep &&
         ad.port_of_arrival === this.selectedTypePortOfArr &&
         ad.container_type === this.selectedcontainertypetomap &&

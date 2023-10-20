@@ -1,4 +1,4 @@
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { NavigationEnd, Router, ActivatedRoute } from '@angular/router';
 import { AddEmployeeServiceService } from './add-employee.service';
 import { SessionService } from '../session.service';
@@ -12,6 +12,7 @@ import { DialogComponent } from '../dialog.component';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { NumberInput } from '@angular/cdk/coercion';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MyAdService } from '../my-advertisement/my-ad.service';
 
 interface Permission {
   write: any;
@@ -33,6 +34,7 @@ export class AddEmployeeComponent {
   get isBlue(): boolean {
     return this.stepper.selectedIndex > 0;
   }
+  userId: any;
   Pfirst_name: any;
   showform=true;
   password1!: string
@@ -68,7 +70,7 @@ export class AddEmployeeComponent {
   changeDetectorRef: any;
   
   Puser_id: any;
- 
+  
   types = [];
   Pis_verified: any;
   Plast_name: any;
@@ -81,7 +83,8 @@ export class AddEmployeeComponent {
   Plast_login: any;
   Pdesignation: any;
   constructor(private snackBar: MatSnackBar,private formBuilder: FormBuilder, private dialog: MatDialog, private router: Router, private addEmployeesService: AddEmployeeServiceService, private sessionService: SessionService, public dialogRef: MatDialogRef<AddEmployeeComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any, private route: ActivatedRoute) {
+    @Inject(MAT_DIALOG_DATA) public data: any, private route: ActivatedRoute,
+    ) {
     this.permissions = []
       ;
   }
@@ -141,7 +144,7 @@ export class AddEmployeeComponent {
       last_name: ['', [Validators.required, Validators.pattern('[a-zA-Z ]*'), Validators.maxLength(20)]],
       address: ['', Validators.required],
       email: ['', [Validators.required, Validators.email, Validators.maxLength(25)]],
-      phone_no: ['', [Validators.pattern('[0-9]*'), Validators.maxLength(15)]],
+      phone_no: ['', [Validators.required, this.validPhoneNumber()]],
       city: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(8), Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$'), Validators.maxLength(15)]],
       confirm_password: ['', [Validators.required, Validators.minLength(8), Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$'), Validators.maxLength(15)]],
@@ -149,7 +152,7 @@ export class AddEmployeeComponent {
       is_approved: [true, Validators.required],
       is_active: [true, Validators.required],
       last_login:formattedDateTime,
-      designation: ['user'],
+      designation: ['employee'],
     }
     );
 
@@ -199,6 +202,18 @@ export class AddEmployeeComponent {
     ).subscribe(() => {
       this.sessionService.clearSession();
     });
+ 
+  }
+  validPhoneNumber(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const phoneNumberPattern = /^[0-9]+$/; // Regular expression to allow only numbers
+  
+      if (control.value && !phoneNumberPattern.test(control.value)) {
+        return { invalidPhoneNumber: true };
+      }
+  
+      return null;
+    };
   }
   logout(): void {
     // clear session data and redirect to login page

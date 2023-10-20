@@ -7,7 +7,7 @@
        
           <div class="radio-buttons">
             <label class="forecast font-semibold ml-2 whitespace-nowrap">My Advertisement</label>
-            <p class="select-type whitespace-nowrap">Select Containers or Vessels as per your requirements</p>
+            <!-- <p class="select-type whitespace-nowrap">Select Containers or Vessels as per your requirements</p> -->
             <!-- <div style="display: inline-block;margin-right: 16px;">
               
               <label class="radio mt-[10px]" style="cursor: pointer;">
@@ -30,14 +30,10 @@
               </label>
             </div> -->
 
-            <div class="flex items-center">
-             
-              <select id="ad-type-dropdown" [(ngModel)]="ad_type" (change)="viewAds(); onAdTypeChange(ad_type)" class="radio ml-2 border rounded-md py-1 px-2">
-                <option value="container" ><img src="120363_original_4240x2832.jpg"/>Container</option>
-                <option value="space"><img src="120363_original_4240x2832.jpg"/>Space</option>
-              </select>              
-            </div>            
-          </div>
+            <div class="flex items-center ml-2">
+              <span *ngIf="ad_type === 'container'" class="select-type whitespace-nowrap">Container Advertisement</span>
+              <span *ngIf="ad_type === 'space'" class="select-type whitespace-nowrap">Vessel Advertisement</span>
+            </div>
           <!-- <div class="dropdown">
             <select id="ad-type-dropdown" [(ngModel)]="ad_type" (change)="viewAds(); onAdTypeChange(ad_type)"  class="custom-dropdown radio ml-2 border rounded-md py-1 px-2">
               <option value="container" class="custom-dropdown-option">
@@ -57,17 +53,10 @@
 
           
  
-          <div class=" ml-80 justify-end flex">
-            <!-- <div class="mb-2  justify-end w-[10em] h-[2em]  flex-wrap">
-              <button >
-                
-              </button>
-            </div> -->
-           
-
-            <div class="mb-2 ml-96 justify-end w-[10em] h-[2em]  flex-wrap">
+          <div class="justify-end ml-96 flex float-right -mt-14">
+            <div class="ml-96 justify-end w-[40em] h-[0.5em] flex-wrap mb-4">
               <button (click)="onExportClick()"
-                class="ml-4 float-right inline-flex justify-center items-center btn-primary9 space-x-2 border font-semibold focus:outline-none py-2 px-2 pr-2 leading-6 font-poppins border-blue-700">
+                class="ml-4 ml-96 float-right inline-flex justify-center items-center btn-primary9 space-x-2 border font-semibold focus:outline-none py-2 px-2 pr-2 leading-6 font-poppins border-blue-700">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M13 12V14H3V12H2V14L2.0038 13.9976C2.00333 14.1288 2.02873 14.2589 2.07854 14.3803C2.12836 14.5017 2.20163 14.6121 2.29414 14.7052C2.38666 14.7983 2.49662 14.8723 2.61774 14.9229C2.73885 14.9734 2.86875 14.9997 3 15H13C13.2652 15 13.5196 14.8946 13.7071 14.7071C13.8946 14.5196 14 14.2652 14 14V12H13Z"
@@ -229,11 +218,18 @@
                           {{ ad_type === 'container' ? 'Port of Ad' : 'Port of Departure' }}
                         </th>
                         <th scope="col border-2" *ngIf="ad_type === 'container'" class="px-4 py-3.5 border-2 text-sm font-medium text-left rtl:text-right text-black dark:text-black">
+                          Port of Departure
+                        </th>
+                        <th scope="col border-2" *ngIf="ad_type === 'container'" class="px-4 py-3.5 border-2 text-sm font-medium text-left rtl:text-right text-black dark:text-black">
+                          Port of Arrival
+                        </th>
+                        <th scope="col border-2" *ngIf="ad_type === 'container'" class="px-4 py-3.5 border-2 text-sm font-medium text-left rtl:text-right text-black dark:text-black">
                           Negotiations
                         </th>
                         <th scope="col border-2" *ngIf="ad_type === 'space'" class="px-4 py-3.5 border-2 text-sm font-medium text-left rtl:text-right text-black dark:text-black">
                           Port of Arrival
                         </th>
+                       
                         <th scope="col border-2" *ngIf="ad_type === 'space' && operation === 'Active'" class="px-4 py-3.5 border-2 text-sm font-medium text-left rtl:text-right text-black dark:text-black">
                           Negotiations
                         </th>
@@ -347,6 +343,27 @@
                             </div>
                           </div>
                         </td>
+                        <td class="px-4 py-4 text-sm border-2 text-gray-700 dark:text-gray-200 whitespace-nowrap" *ngIf="ad_type == 'container'">
+                          <div class="flex flex-row gap-2">
+                            <div class="flex flex-col">
+                              
+                              <div class="gray-highlights">
+                                {{ ad.port_of_departure }}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-4 py-4 text-sm border-2 text-gray-700 dark:text-gray-200 whitespace-nowrap" *ngIf="ad_type == 'container'">
+                          <div class="flex flex-row gap-2">
+                            <div class="flex flex-col">
+                              
+                              <div class="gray-highlights">
+                                {{ ad.port_of_arrival }}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        
 
                         <td class="px-2 py-4 -ml-1 text-sm border-2 text-gray-700 dark:text-gray-200 whitespace-nowrap">
                           <div style="display: flex;">
@@ -453,5 +470,3 @@
           </div>
       
    
-
-

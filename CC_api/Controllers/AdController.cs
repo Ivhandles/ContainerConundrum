@@ -40,6 +40,14 @@ namespace CC_api.Controllers
       var Ads = await this._AdRepository.GetAllAdvertisement(ad_type, companyID);
       return Ads;
     }
+
+    [HttpGet("GetAllAdontypeofad")]
+    public async Task<List<Ad>> GetAllAd(string ad_type, string type_of_ad, int companyID)
+    {
+      var Ads = await this._AdRepository.GetAllAdontypeofad(ad_type, type_of_ad, companyID);
+      return Ads;
+    }
+
     [HttpGet("GetMyAd")]
     public async Task<List<Ad>> GetAllFiless(string ad_type, int companyID)
     {
