@@ -22,7 +22,7 @@ stages:
           - task: Docker@2
             displayName: 'Build UI Docker Image'
             inputs:
-              containerRegistry: 'ServiceconnectionUI'
+              containerRegistry: 'containerregistry-ui'
               repository: '$(ACR_NAME)/ui'
               command: 'build'
               Dockerfile: '$(DOCKERFILE_PATH_UI)'
@@ -37,7 +37,7 @@ stages:
           - task: Docker@2
             displayName: 'Build API Docker Image'
             inputs:
-              containerRegistry: 'ServiceconnectionAPI'
+              containerRegistry: 'containerregistry-api'
               repository: '$(ACR_NAME)/api'
               command: 'build'
               Dockerfile: '$(DOCKERFILE_PATH_API)'
