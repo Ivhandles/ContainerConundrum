@@ -27,6 +27,15 @@ stages:
               command: 'build'
               Dockerfile: '$(DOCKERFILE_PATH_UI)'
               tags: '$(Build.BuildId)'
+          - task: Docker@2
+            displayName: Push
+            inputs:
+              containerRegistry: 'containerregistry-ui'
+              repository: '$(ACR_NAME)/ui'
+              command: push
+              Dockerfile: '$(DOCKERFILE_PATH_UI)'
+              tags: '$(Build.BuildId)'
+
 
       - job: Build_API
         displayName: 'Build API Docker Image'
@@ -40,5 +49,13 @@ stages:
               containerRegistry: 'containerregistry-api'
               repository: '$(ACR_NAME)/api'
               command: 'build'
+              Dockerfile: '$(DOCKERFILE_PATH_API)'
+              tags: '$(Build.BuildId)'
+          - task: Docker@2
+            displayName: Push
+            inputs:
+              containerRegistry: 'containerregistry-api'
+              repository: '$(ACR_NAME)/api'
+              command: push
               Dockerfile: '$(DOCKERFILE_PATH_API)'
               tags: '$(Build.BuildId)'         
