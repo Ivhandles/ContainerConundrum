@@ -8,6 +8,8 @@ variables:
   ACR_RESOURCE_GROUP: 'Ivoyant-ACR'
   DOCKERFILE_PATH_UI: './cc-ui/Dockerfile'
   DOCKERFILE_PATH_API: './CC_api/Dockerfile'
+  UI_APP_SERVICE_NAME: 'ccappui'
+  API_APP_SERVICE_NAME: 'ccappapi'
 
 stages:
   - stage: Build
@@ -58,4 +60,34 @@ stages:
               repository: '$(ACR_NAME)/cc_api'
               command: push
               Dockerfile: '$(DOCKERFILE_PATH_API)'
-              tags: '$(Build.BuildId)'         
+              tags: '$(Build.BuildId)'
+  - stage: Deploy
+    displayName: 'Deploy to Azure App Service'
+    jobs:
+      - job: Deploy_UI
+        displayName: 'Deploy UI to Azure App Service'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: AzureRmWebAppDeployment@4
+            displayName: 'Azure App Service Deploy'
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'ccazportal-appservice-connection'
+              appType: 'webApp'
+              WebAppName: '$(UI_APP_SERVICE_NAME)'
+              packageForLinux: '$(ACR_NAME)/cc_ui:$(Build.BuildId)'
+
+      - job: Deploy_API
+        displayName: 'Deploy API to Azure App Service'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: AzureRmWebAppDeployment@4
+            displayName: 'Azure App Service Deploy'
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'ccazportal-appservice-connection'
+              appType: 'webApp'
+              WebAppName: '$(API_APP_SERVICE_NAME)'
+              packageForLinux: '$(ACR_NAME)/cc_api:$(Build.BuildId)'
