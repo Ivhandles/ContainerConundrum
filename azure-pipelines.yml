@@ -23,7 +23,7 @@ stages:
             displayName: 'Build UI Docker Image'
             inputs:
               containerRegistry: 'containerregistry-ui'
-              repository: '$(ACR_NAME)/ui'
+              repository: '$(ACR_NAME)/cc_ui'
               command: 'build'
               Dockerfile: '$(DOCKERFILE_PATH_UI)'
               tags: '$(Build.BuildId)'
@@ -31,7 +31,7 @@ stages:
             displayName: Push
             inputs:
               containerRegistry: 'containerregistry-ui'
-              repository: '$(ACR_NAME)/ui'
+              repository: '$(ACR_NAME)/cc_ui'
               command: push
               Dockerfile: '$(DOCKERFILE_PATH_UI)'
               tags: '$(Build.BuildId)'
@@ -47,7 +47,7 @@ stages:
             displayName: 'Build API Docker Image'
             inputs:
               containerRegistry: 'containerregistry-api'
-              repository: '$(ACR_NAME)/api'
+              repository: '$(ACR_NAME)/cc_api'
               command: 'build'
               Dockerfile: '$(DOCKERFILE_PATH_API)'
               tags: '$(Build.BuildId)'
@@ -55,7 +55,7 @@ stages:
             displayName: Push
             inputs:
               containerRegistry: 'containerregistry-api'
-              repository: '$(ACR_NAME)/api'
+              repository: '$(ACR_NAME)/cc_api'
               command: push
               Dockerfile: '$(DOCKERFILE_PATH_API)'
               tags: '$(Build.BuildId)'         
