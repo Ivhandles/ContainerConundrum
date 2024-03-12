@@ -4,7 +4,7 @@ trigger:
       - "azure-pipelines"
 
 variables: 
-  ACR_NAME: 'IvoyantACR'
+  ACR_NAME: 'ivoyantacr'
   ACR_RESOURCE_GROUP: 'Ivoyant-ACR'
   DOCKERFILE_PATH_UI: './cc-ui/Dockerfile'
   DOCKERFILE_PATH_API: './CC_api/Dockerfile'
