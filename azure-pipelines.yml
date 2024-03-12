@@ -76,7 +76,7 @@ stages:
               azureSubscription: 'ccazportal-appservice-connection'
               appType: 'webApp'
               WebAppName: '$(UI_APP_SERVICE_NAME)'
-              packageForLinux: '$(ACR_NAME)/cc_ui:$(Build.BuildId)'
+              packageForLinux: '$(ACR_NAME).azurecr.io/cc_ui:$(Build.BuildId)'
 
       - job: Deploy_API
         displayName: 'Deploy API to Azure App Service'
@@ -90,4 +90,4 @@ stages:
               azureSubscription: 'ccazportal-appservice-connection'
               appType: 'webApp'
               WebAppName: '$(API_APP_SERVICE_NAME)'
-              packageForLinux: '$(ACR_NAME)/cc_api:$(Build.BuildId)'
+              packageForLinux: '$(ACR_NAME).azurecr.io/cc_api:$(Build.BuildId)'
