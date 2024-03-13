@@ -37,9 +37,7 @@ stages:
               Dockerfile: '$(DOCKERFILE_PATH_UI)'
               tags: '$(Build.BuildId)'
             displayName: Push UI Docker Image
-            env:
-              BUILD_SOURCEBRANCHNAME: '$(Build.SourceBranchName)'
-              BUILD_BUILDID: '$(Build.BuildId)'
+
 
       - job: Build_API
         displayName: 'Build API Docker Image'
@@ -63,46 +61,30 @@ stages:
               Dockerfile: '$(DOCKERFILE_PATH_API)'
               tags: '$(Build.BuildId)'
             displayName: Push API Docker Image
-            env:
-              BUILD_SOURCEBRANCHNAME: '$(Build.SourceBranchName)'
-              BUILD_BUILDID: '$(Build.BuildId)'
+
 
   - stage: Deploy
     displayName: 'Deploy to Azure App Service'
     dependsOn: Build
     jobs:
-      - job: Deploy_UI
-        displayName: 'Deploy UI to Azure App Service'
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
-          - download: current
-            artifact: docker-image
-            displayName: Download UI Docker Image Artifact
+    - job: Deploy_UI
+      displayName: 'Deploy UI to Azure App Service'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - script: |
+            az acr login --name $(ACR_NAME)
+            docker pull $(ACR_NAME).azurecr.io/cc_ui:$(Build.BuildId)
+            az webapp config container set --name $(UI_APP_SERVICE_NAME) --resource-group $(ACR_RESOURCE_GROUP) --docker-custom-image-name $(ACR_NAME).azurecr.io/cc_ui:$(Build.BuildId)
+          displayName: 'Pull and Deploy UI Docker Image'
 
-          - task: AzureRmWebAppDeployment@4
-            displayName: 'Azure App Service Deploy'
-            inputs:
-              ConnectionType: 'AzureRM'
-              azureSubscription: 'ccazportal-appservice-connection'
-              appType: 'webApp'
-              WebAppName: '$(UI_APP_SERVICE_NAME)'
-              packageForLinux: '$(Pipeline.Workspace)/docker-image/cc_ui:$(BUILD_BUILDID)'
-
-      - job: Deploy_API
-        displayName: 'Deploy API to Azure App Service'
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
-          - download: current
-            artifact: docker-image
-            displayName: Download API Docker Image Artifact
-
-          - task: AzureRmWebAppDeployment@4
-            displayName: 'Azure App Service Deploy'
-            inputs:
-              ConnectionType: 'AzureRM'
-              azureSubscription: 'ccazportal-appservice-connection'
-              appType: 'webApp'
-              WebAppName: '$(API_APP_SERVICE_NAME)'
-              packageForLinux: '$(Pipeline.Workspace)/docker-image/cc_api:$(BUILD_BUILDID)'
+    - job: Deploy_API
+      displayName: 'Deploy API to Azure App Service'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - script: |
+            az acr login --name $(ACR_NAME)
+            docker pull $(ACR_NAME).azurecr.io/cc_api:$(Build.BuildId)
+            az webapp config container set --name $(API_APP_SERVICE_NAME) --resource-group $(ACR_RESOURCE_GROUP) --docker-custom-image-name $(ACR_NAME).azurecr.io/cc_api:$(Build.BuildId)
+          displayName: 'Pull and Deploy API Docker Image'
