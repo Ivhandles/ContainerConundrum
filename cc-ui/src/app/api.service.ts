@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
   //const BASE_URL = 'https://contanerc-api.azurewebsites.net/';
-const BASE_URL ='https://ccappapi.azurewebsites.net/swagger/index.html';
+const BASE_URL ='https://ccapp-api.azurewebsites.net/swagger/index.html';
 @Injectable({
   providedIn: 'root'
 })
