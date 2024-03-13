@@ -75,8 +75,8 @@ stages:
         - script: |
             az login --service-principal -u $(AZURE_SERVICE_PRINCIPAL_ID) -p $(AZURE_SERVICE_PRINCIPAL_PASSWORD) --tenant $(AZURE_TENANT_ID)
             az acr login --name $(ACR_NAME)
-            docker pull $(ACR_NAME).azurecr.io/cc_ui:$(Build.BuildId)
-            az webapp config container set --name $(UI_APP_SERVICE_NAME) --resource-group $(ACR_RESOURCE_GROUP) --docker-custom-image-name $(ACR_NAME).azurecr.io/cc_ui:$(Build.BuildId)
+            # docker pull $(ACR_NAME).azurecr.io/cc_ui:$(Build.BuildId)
+            # az webapp config container set --name $(UI_APP_SERVICE_NAME) --resource-group $(ACR_RESOURCE_GROUP) --docker-custom-image-name $(ACR_NAME).azurecr.io/cc_ui:$(Build.BuildId)
           displayName: 'Pull and Deploy UI Docker Image'
 
     - job: Deploy_API
@@ -87,6 +87,6 @@ stages:
         - script: |
             az login --service-principal -u $(AZURE_SERVICE_PRINCIPAL_ID) -p $(AZURE_SERVICE_PRINCIPAL_PASSWORD) --tenant $(AZURE_TENANT_ID)
             az acr login --name $(ACR_NAME)
-            docker pull $(ACR_NAME).azurecr.io/cc_api:$(Build.BuildId)
-            az webapp config container set --name $(API_APP_SERVICE_NAME) --resource-group $(ACR_RESOURCE_GROUP) --docker-custom-image-name $(ACR_NAME).azurecr.io/cc_api:$(Build.BuildId)
+            # docker pull $(ACR_NAME).azurecr.io/cc_api:$(Build.BuildId)
+            # az webapp config container set --name $(API_APP_SERVICE_NAME) --resource-group $(ACR_RESOURCE_GROUP) --docker-custom-image-name $(ACR_NAME).azurecr.io/cc_api:$(Build.BuildId)
           displayName: 'Pull and Deploy API Docker Image'
