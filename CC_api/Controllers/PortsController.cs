@@ -30,7 +30,11 @@ namespace CC_api.Controllers
       return await portsBusiness.GetAllCTypesAsync();
     }
 
-
+    [HttpGet("GetPortsByCountryId/{countryId}")]
+    public async Task<List<Ports>> GetPortsBycountryId(int countryId)
+    {
+      return await portsBusiness.GetPortsBycountryId(countryId);
+    }
 
 
   }

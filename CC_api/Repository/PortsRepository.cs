@@ -1,5 +1,6 @@
 using CC_api.Models;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.Design;
 
 namespace CC_api.Repository
 {
@@ -33,6 +34,12 @@ namespace CC_api.Repository
       var port = dbContext.ports.FirstOrDefault(p => p.port_id == portId);
       return port;
     }
+
+    public async Task<List<Ports>> GetPortsBycountryId(int countryId)
+    {
+      return await dbContext.ports.Where(u => u.country_id == countryId).ToListAsync();
+    }
+
   }
 }
 

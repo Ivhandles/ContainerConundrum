@@ -20,7 +20,7 @@ namespace CC_api.Models
     public string? sub_region { get; set; }
     public string status { get; set; }
     public string port_code{ get; set; }
-    
 
+    public int country_id { get; set; }
   }
 }

@@ -21,6 +21,7 @@ export class ForecastMapComponent implements OnInit,AfterViewInit  {
   map: any
   port_name: string = ""; 
   port_list:any;
+  countryPorts_list:any;
   companyId!: number
   totalSurplusPercentage: number = 0;
 totalDeficitPercentage: number = 0;
@@ -61,7 +62,18 @@ isInventoryEmpty: boolean = false;
         console.log("ports loading error:" +error);
       }
     );
+this.forecastService.getAllCountry().subscribe
+(
+  (  data: any) => {
+    this.countryPorts_list = data;
+    console.log("Port list fetched: ", this.countryPorts_list); 
+  },
+  error => {
+    console.log("ports loading error:" +error);
+  }
 
+  
+)
   }
   reloadMap() {
     location.reload();

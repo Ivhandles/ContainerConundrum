@@ -24,7 +24,7 @@ namespace CC_api.Models
     public DbSet<CarrierService> carrier_service { get; set; }
 
     public DbSet<PortSequence> port_sequence { get; set; }
-
+    public DbSet<Country> country { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
