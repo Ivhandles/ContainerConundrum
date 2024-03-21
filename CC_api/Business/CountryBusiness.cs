@@ -17,5 +17,10 @@ namespace CC_api.Business
     {
       return await countryRepository.GetAllCountriesAsync();
     }
+    public async Task<List<Ports>> GetAllPortsbyCountryName(string countryName)
+    {
+      var countryname = await countryRepository.GetAllPortsbyCountryName(countryName);
+      return countryname;
+    }
   }
 }

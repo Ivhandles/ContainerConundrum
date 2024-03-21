@@ -14,5 +14,15 @@ namespace CC_api.Repository
     {
       return dbContext.country.ToList();
     }
+    public async Task<List<Ports>> GetAllPortsbyCountryName(string couuntryName)
+    {
+      var country = dbContext.country.FirstOrDefault(e => e.country_name == couuntryName);
+      if (country != null)
+      {
+        var port = dbContext.ports.Where(p => p.country_id == country.country_id).ToList();
+        return port;
+      }
+      return null;
+    }
   }
 }

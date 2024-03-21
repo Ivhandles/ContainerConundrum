@@ -291,10 +291,7 @@ debugger
     } else {
       // Find the selected port based on port_name in your port_list
       const selectedPort = this.port_list.find((port: { port_name: string; }) => port.port_name === selectedPortName);
-  
-
       if (selectedPort) {
-        
         // Get the latitude and longitude of the selected port
         const latitude = +selectedPort.latitude;
         const longitude = +selectedPort.longitude;
@@ -308,7 +305,59 @@ debugger
     }
   }
   
+ // Define an array to store markers
+markerss: google.maps.Marker[] = [];
 
+onCountrySelected(selectedCountryName: string) {
+  // Clear previously displayed markers
+  this.clearMarkers();
+
+  this.forecastService.getPortsByCountryName(selectedCountryName).subscribe(
+    (response: any[]) => {
+      // Assuming response contains an array of port details
+      response.forEach((port: any) => {
+        // Get the latitude and longitude of the port
+        const latitude = +port.latitude;
+        const longitude = +port.longitude;
+
+        // Create a marker for the port
+        const marker = new google.maps.Marker({
+          position: { lat: latitude, lng: longitude },
+          map: this.map,
+          title: port.port_name,
+          // Set the marker icon to a red dot
+          icon: {
+            url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+          },
+        });
+
+        // Push the marker to the markers array
+        this.markerss.push(marker);
+      });
+      this.zoomToFit();
+    },
+    (error: any) => {
+      console.error('Error fetching carrier services:', error);
+    }
+  );
+}
+
+// Function to clear markers from the map
+clearMarkers() {
+  this.markerss.forEach(marker => {
+    marker.setMap(null);
+  });
+  this.markerss = [];
+}
+
+zoomToFit() {
+  const bounds = new google.maps.LatLngBounds();
+  this.markerss.forEach(marker => {
+    bounds.extend(marker.getPosition() as google.maps.LatLng);
+  });
+  this.map.fitBounds(bounds);
+}
+ 
 
  
  
