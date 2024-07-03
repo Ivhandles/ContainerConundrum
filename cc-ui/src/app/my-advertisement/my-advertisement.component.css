@@ -303,7 +303,7 @@ border-radius: 6px;
       margin-right: 1rem;
     }
     
-    .div-company-details .mx-[1rem] {
+    .div-company-details{
       display: flex;
       align-items: center;
     }
