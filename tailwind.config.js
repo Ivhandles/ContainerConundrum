@@ -5,14 +5,13 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors:{
-        'CCblue': '#597ef7'
-
-      }
+      colors: {
+        'CCblue': '#597ef7',
+      },
     },
-    fontFamily:{
-      poppins: ["Poppins","sans-serif"]
-    }
+    fontFamily: {
+      poppins: ["Poppins", "sans-serif"],
+    },
   },
   plugins: [],
 }
