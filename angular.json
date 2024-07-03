@@ -27,7 +27,11 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "countries-list",
+              "lodash"
+            ]
           },
           "configurations": {
             "production": {
@@ -61,7 +65,6 @@
           "configurations": {
             "production": {
               "browserTarget": "cc-ui:build:production"
-              
             },
             "development": {
               "browserTarget": "cc-ui:build:development"
