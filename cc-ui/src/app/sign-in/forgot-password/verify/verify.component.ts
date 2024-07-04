@@ -3,7 +3,7 @@ import { ForgotPassService } from '../forgot-password.service';
 import { Router } from '@angular/router';
 import { ResetService } from '../../reset-password/reset.service';
 import { ConfirmationResponse } from '../../reset-password/ConfirmationResponse';
-import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-verify',
   templateUrl: './verify.component.html',
