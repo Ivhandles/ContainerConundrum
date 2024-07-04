@@ -1,0 +1,9 @@
+[build]
+  command = "ng build --configuration production"
+  publish = "dist/cc-ui"
+
+[build.environment]
+  NODE_VERSION = "14"
+
+[[plugins]]
+  package = "@netlify/plugin-angular"
