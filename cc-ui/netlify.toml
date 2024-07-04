@@ -1,6 +1,6 @@
 [build]
   command = "ng build --configuration production"
-  publish = "dist/cc-ui"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "14"
